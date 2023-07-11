@@ -160,6 +160,14 @@ function edit_confirmed() {
     }
 }
 
+function members_confirmed() {
+    if (prev_scenario == 'chats') {
+        new_conversation()
+    } else if (prev_scenario == 'kanban') {
+        menu_new_board_name()
+    }
+}
+
 function menu_forget_conv() {
     // toggles the forgotten flag of a conversation
     if (curr_chat == recps2nm([myId])) {
@@ -672,7 +680,7 @@ function new_conversation() {
     if (cid in tremola.chats) {
         if (tremola.chats[cid].forgotten) {
             tremola.chats[cid].forgotten = false;
-            load_chat_list(); // refresh
+            load_chat_list(); // refresh5
         } else
             launch_snackbar("Conversation already exists");
         return;
@@ -799,7 +807,7 @@ function escapeHTML(str) {
 }
 
 function recps2nm(rcps) { // use concat of sorted FIDs as internal name for conversation
-    return "ALL";
+                          // return "ALL";
     return rcps.sort().join('').replace(/.ed25519/g, '');
 }
 
