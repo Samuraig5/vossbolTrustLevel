@@ -16,6 +16,12 @@ var colors = ["#d9ceb2", "#99b2b7", "#e6cba5", "#ede3b4", "#8b9e9b", "#bd7578", 
 var curr_img_candidate = null;
 var pubs = []
 
+/**
+ * @author Joan Moser <Gian.Moser@Unibas.ch>
+ * @author Tom Rodewald <Tom.Rodewald@Unibas.ch>
+ *
+ * This holds the information used for levels of trust.
+ */
 const trustLevels = Object.freeze({
     Restricted: {trustName: "Restricted", trustScore: 3, tintColour: '#232323'},
     Strangers: {trustName: "Stranger", trustScore: 2, tintColour: '#f13b3b'},
@@ -441,25 +447,76 @@ function load_contact_list() {
     }
 }
 
+/**
+ * @author Joan Moser <Gian.Moser@Unibas.ch>
+ * @author Tom Rodewald <Tom.Rodewald@Unibas.ch>
+ *
+ * This function smoothly interpolates between two Hex colours with a lerp weight.
+ * The lerp weight will decide the strengh of each colour:
+ * t = 0 => Resulting colour will be equal to color1
+ * t = 0.5 => Resulting colour will be an even mix between the colours
+ * t = 1 => Resulting colour will be qeual to color2
+ *
+ * The edge cases are handled like this:
+ * t < 0 will set t = 0
+ * t > 1 will set t = 1
+ *
+ * @param color1 First Hex Colour
+ * @param color2 Second Hex Colour
+ * @param t Lerp Weight.
+ * @return Interpolated Hex Colour
+ */
 function lerpColor(color1, color2, t) {
-    // Convert color strings to RGB values
+    if (t < 0) {t = 0;}
+    else if (t > 1) {t = 1;}
+
+    // Convert Hex color to RGB values
     const rgb1 = hexToRgb(color1);
     const rgb2 = hexToRgb(color2);
 
-    // Perform linear interpolation
+    // Perform linear interpolation on each RGB component
     const r = lerp(rgb1.r, rgb2.r, t);
     const g = lerp(rgb1.g, rgb2.g, t);
     const b = lerp(rgb1.b, rgb2.b, t);
 
-    // Convert back to color string
+    // Convert color back to Hex representation
     const interpolatedColor = rgbToHex(Math.round(r), Math.round(g), Math.round(b));
     return interpolatedColor;
 }
 
+/**
+ * @author Joan Moser <Gian.Moser@Unibas.ch>
+ * @author Tom Rodewald <Tom.Rodewald@Unibas.ch>
+ *
+ * This function smoothly interpolates between two floats with a lerp weight.
+ * The lerp weight will decide the strengh of each float.
+ * The greater t, the stronger b is favoured.
+ *
+ * The edge cases are handled like this:
+ * t < 0 will set t = 0
+ * t > 1 will set t = 1
+ *
+ * @param a First Float
+ * @param b Second Float
+ * @param t Lerp Weight
+ * @return Interpolated Float
+ */
 function lerp(a, b, t) {
+    if (t < 0) {t = 0;}
+    else if (t > 1) {t = 1;}
+
     return (1 - t) * a + t * b;
 }
 
+/**
+ * @author Joan Moser <Gian.Moser@Unibas.ch>
+ * @author Tom Rodewald <Tom.Rodewald@Unibas.ch>
+ *
+ * This function transforms a hex colour representation into a RGB colour representation
+ *
+ * @param hex a Colour in Hex representation
+ * @return a Colour in RGB representation
+ */
 function hexToRgb(hex) {
     const bigint = parseInt(hex.replace("#", ""), 16);
     const r = (bigint >> 16) & 255;
@@ -468,17 +525,38 @@ function hexToRgb(hex) {
     return {r, g, b};
 }
 
+/**
+ * @author Joan Moser <Gian.Moser@Unibas.ch>
+ * @author Tom Rodewald <Tom.Rodewald@Unibas.ch>
+ *
+ * This function transforms a RGB colour representation into a Hex colour representation
+ *
+ * @param hex a Colour in RGB representation
+ * @return a Colour in Hex representation
+ */
 function rgbToHex(r, g, b) {
     return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, "0")}`;
 }
 
-function load_contact_item(c) { // [ id, { "alias": "thealias", "initial": "T", "color": "#123456" } ] }
+/**
+ * @author (Orignial Author Unknown)
+ * @author Joan Moser (partial) <Gian.Moser@Unibas.ch>
+ * @author Tom Rodewald (partial) <Tom.Rodewald@Unibas.ch>
+ *
+ * This function generates the 'Icon' circle and the contact bar for a given contact in the contact list
+ *
+ * @param c Contact of format: [ id, { "alias": "thealias", "initial": "T", "color": "#123456" } ]
+ */
+function load_contact_item(c) {
+    // Create the 'Icon' circle and the contact bar
     var row, item = document.createElement('div'), bg;
     item.setAttribute('style', 'padding: 0px 5px 10px 5px;'); // old JS (SDK 23)
+    // If no Initial is set, take first letter of alias
     if (!("initial" in c[1])) {
         c[1]["initial"] = c[1].alias.substring(0, 1).toUpperCase();
         persist();
     }
+    // If no colour is set, take random colour from predefined list of colours
     if (!("color" in c[1])) {
         c[1]["color"] = colors[Math.floor(colors.length * Math.random())];
         persist();
@@ -492,16 +570,22 @@ function load_contact_item(c) { // [ id, { "alias": "thealias", "initial": "T", 
 
     // console.log("load_c_i", JSON.stringify(c[1]))
     bg = c[1].forgotten ? '#800000' : '#fdfdfd';
-
+    //This will lerp the background of the contact with the associated with the colour of the contacts trust level.
     bg = lerpColor(bg, c[1].levelsOfTrust.tintColour, 0.3)
-
+    // Create the 'Icon' Circle
     row = "<button class=contact_picture style='margin-right: 0.75em; background: " + c[1].color + ";'>" + c[1].initial + " " + c[1].levelsOfTrust.trustScore + "</button>";
+    // Create the Contact Bar
     row += "<button class='chat_item_button' style='overflow: hidden; width: calc(100% - 4em); background-color: " + bg + ";' onclick='show_contact_details(\"" + c[0] + "\");'>";
+    // Display the Alias of the Contact
     row += "<div style='white-space: nowrap;'><div style='text-overflow: ellipsis; overflow: hidden;'>" + escapeHTML(c[1].alias) + "</div>";
+    // Display the ID of the contact
     row += "<div style='text-overflow: clip; overflow: 'ellipsis';'><font size=-2>" + c[0] + "</font></div></div></button>";
+
+    // This seems to be unused code from previous contributions. Maybe it should be removed? - Joan
     // var row  = "<td><button class=contact_picture></button><td style='padding: 5px;'><button class='contact_item_button light w100'>";
     // row += escapeHTML(c[1].alias) + "<br><font size=-2>" + c[0] + "</font></button>";
     // console.log(row);
+
     item.innerHTML = row;
     document.getElementById('lst:contacts').appendChild(item);
 }
