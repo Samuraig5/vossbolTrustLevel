@@ -16,7 +16,12 @@ var colors = ["#d9ceb2", "#99b2b7", "#e6cba5", "#ede3b4", "#8b9e9b", "#bd7578", 
 var curr_img_candidate = null;
 var pubs = []
 
-var trustLevels = ["Restricted", "Strangers", "Acquaintance", "Friends"]
+const trustLevels = Object.freeze({
+    Restricted: {name: Restricted, level: 3},
+    Strangers: {name: Strangers, level: 2},
+    Acquaintance: {name: Acquaintance, level: 1},
+    Friends: {name: Friends, level: 0}
+});
 
 // --- menu callbacks
 
@@ -697,7 +702,7 @@ function resetTremola() { // wipes browser-side content
         "initial": "M",
         "color": "#bd7578",
         "forgotten": false,
-        "levelsOfTrust": trustLevels[3]
+        "levelsOfTrust": trustLevels.Friends
     };
     persist();
 }
