@@ -23,10 +23,10 @@ var pubs = []
  * This holds the information used for levels of trust.
  */
 const trustLevels = Object.freeze({
-    Restricted: {trustScore: 3, tintColour: '#232323'},
-    Strangers: {trustScore: 2, tintColour: '#f13b3b'},
-    Acquaintance: {trustScore: 1, tintColour: '#d7de30'},
-    Friends: {trustScore: 0, tintColour: '#4ebc2e'},
+    Restricted: {trustName: "Restricted", trustScore: 3, tintColour: '#232323'},
+    Strangers: {trustName: "Stranger", trustScore: 2, tintColour: '#f13b3b'},
+    Acquaintance: {trustName: "Acquaintance", trustScore: 1, tintColour: '#d7de30'},
+    Friends: {trustName: "Friend", trustScore: 0, tintColour: '#4ebc2e'},
 });
 
 // --- menu callbacks
@@ -570,6 +570,7 @@ function show_contact_details(id) {
     var details = '';
     details += '<br><div>Shortname: &nbsp;' + id2b32(id) + '</div>\n';
     details += '<br><div style="word-break: break-all;">SSB identity: &nbsp;<tt>' + id + '</tt></div>\n';
+    details += '<br><div style="word-break: break-all;">Trust Level: &nbsp;<tt>' + c.levelsOfTrust.trustName + '</tt></div>\n';
     details += '<br><div class=settings style="padding: 0px;"><div class=settingsText>Forget this contact</div><div style="float: right;"><label class="switch"><input id="hide_contact" type="checkbox" onchange="toggle_forget_contact(this);"><span class="slider round"></span></label></div></div>'
     document.getElementById('old_contact_details').innerHTML = details;
     document.getElementById('old_contact-overlay').style.display = 'initial';
