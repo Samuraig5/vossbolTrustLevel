@@ -17,10 +17,10 @@ var curr_img_candidate = null;
 var pubs = []
 
 const trustLevels = Object.freeze({
-    Restricted: {name: Restricted, level: 3},
-    Strangers: {name: Strangers, level: 2},
-    Acquaintance: {name: Acquaintance, level: 1},
-    Friends: {name: Friends, level: 0}
+    Restricted: {level: 3, tintColour: '#232323'},
+    Strangers: {level: 2, tintColour: '#f13b3b'},
+    Acquaintance: {level: 1, tintColour: '#d7de30'},
+    Friends: {level: 0, tintColour: '#4ebc2e'},
 });
 
 // --- menu callbacks
@@ -130,14 +130,19 @@ function edit_confirmed() {
         if (val == '')
             val = id2b32(new_contact_id);
         tremola.contacts[new_contact_id] = {
-            "alias": val, "initial": val.substring(0, 1).toUpperCase(),
-            "color": colors[Math.floor(colors.length * Math.random())]
+            "alias": val,
+            "initial": val.substring(0, 1).toUpperCase(),
+            "color": colors[Math.floor(colors.length * Math.random())],
+            "levelsOfTrust": trustLevels.Strangers
         };
         var recps = [myId, new_contact_id];
         var nm = recps2nm(recps);
         tremola.chats[nm] = {
-            "alias": "Chat w/ " + val, "posts": {}, "members": recps,
-            "touched": Date.now(), "lastRead": 0
+            "alias": "Chat w/ " + val,
+            "posts": {},
+            "members": recps,
+            "touched": Date.now(),
+            "lastRead": 0
         };
         persist();
         backend("add:contact " + new_contact_id + " " + btoa(val))
@@ -404,6 +409,37 @@ function load_contact_list() {
         }
 }
 
+function lerpColor(color1, color2, t) {
+    // Convert color strings to RGB values
+    const rgb1 = hexToRgb(color1);
+    const rgb2 = hexToRgb(color2);
+
+    // Perform linear interpolation
+    const r = lerp(rgb1.r, rgb2.r, t);
+    const g = lerp(rgb1.g, rgb2.g, t);
+    const b = lerp(rgb1.b, rgb2.b, t);
+
+    // Convert back to color string
+    const interpolatedColor = rgbToHex(Math.round(r), Math.round(g), Math.round(b));
+    return interpolatedColor;
+}
+
+function lerp(a, b, t) {
+    return (1 - t) * a + t * b;
+}
+
+function hexToRgb(hex) {
+    const bigint = parseInt(hex.replace("#", ""), 16);
+    const r = (bigint >> 16) & 255;
+    const g = (bigint >> 8) & 255;
+    const b = bigint & 255;
+    return { r, g, b };
+}
+
+function rgbToHex(r, g, b) {
+    return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, "0")}`;
+}
+
 function load_contact_item(c) { // [ id, { "alias": "thealias", "initial": "T", "color": "#123456" } ] }
     var row, item = document.createElement('div'), bg;
     item.setAttribute('style', 'padding: 0px 5px 10px 5px;'); // old JS (SDK 23)
@@ -416,9 +452,12 @@ function load_contact_item(c) { // [ id, { "alias": "thealias", "initial": "T", 
         persist();
     }
     // console.log("load_c_i", JSON.stringify(c[1]))
-    bg = c[1].forgotten ? ' gray' : ' light';
+    bg = c[1].forgotten ? '#800000' : '#fdfdfd';
+
+    bg = lerpColor(bg, c[1].levelsOfTrust.tintColour, 0.5)
+
     row = "<button class=contact_picture style='margin-right: 0.75em; background: " + c[1].color + ";'>" + c[1].initial + "</button>";
-    row += "<button class='chat_item_button" + bg + "' style='overflow: hidden; width: calc(100% - 4em);' onclick='show_contact_details(\"" + c[0] + "\");'>";
+    row += "<button class='chat_item_button' style='overflow: hidden; width: calc(100% - 4em); background-color: " + bg + ";' onclick='show_contact_details(\"" + c[0] + "\");'>";
     row += "<div style='white-space: nowrap;'><div style='text-overflow: ellipsis; overflow: hidden;'>" + escapeHTML(c[1].alias) + "</div>";
     row += "<div style='text-overflow: clip; overflow: 'ellipsis';'><font size=-2>" + c[0] + "</font></div></div></button>";
     // var row  = "<td><button class=contact_picture></button><td style='padding: 5px;'><button class='contact_item_button light w100'>";
@@ -701,8 +740,8 @@ function resetTremola() { // wipes browser-side content
         "alias": "me",
         "initial": "M",
         "color": "#bd7578",
-        "forgotten": false,
-        "levelsOfTrust": trustLevels.Friends
+        "levelsOfTrust": trustLevels.Friends,
+        "forgotten": false
     };
     persist();
 }
