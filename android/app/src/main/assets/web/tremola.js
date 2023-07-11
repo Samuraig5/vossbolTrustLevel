@@ -103,6 +103,12 @@ function menu_reset() {
     backend("reset");
 }
 
+function edit_checkEnter(ev) {
+    if (ev.key == "Enter") {
+        edit_confirmed()
+    }
+}
+
 function menu_edit(target, title, text) {
     closeOverlay()
     document.getElementById('edit-overlay').style.display = 'initial';
