@@ -475,19 +475,6 @@ function load_chat_item(nm) { // appends a button for conversation with name nm 
     set_chats_badge(nm)
 }
 
-function load_contact_list() {
-    document.getElementById("lst:contacts").innerHTML = '';
-    for (var id in tremola.contacts)
-        if (!tremola.contacts[id].forgotten)
-            load_contact_item([id, tremola.contacts[id]]);
-    if (!tremola.settings.hide_forgotten_contacts)
-        for (var id in tremola.contacts) {
-            var c = tremola.contacts[id]
-            if (c.forgotten)
-                load_contact_item([id, c]);
-        }
-}
-
 /**
  * @author Joan Moser <Gian.Moser@Unibas.ch>
  * @author Tom Rodewald <Tom.Rodewald@Unibas.ch>
