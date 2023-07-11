@@ -402,6 +402,15 @@ function load_chat_item(nm) { // appends a button for conversation with name nm 
     set_chats_badge(nm)
 }
 
+/**
+ * @author Joan Moser <Gian.Moser@Unibas.ch>
+ * @author Tom Rodewald <Tom.Rodewald@Unibas.ch>
+ *
+ * This function returns a tupel [contactArray, contactIdArray] of all contacts in tremola.contacts,
+ * sorted such that contacts (and their associated ID's with lower trust levels come first)
+ *
+ * @return sorted tupel of arrays with the format: [contactArray, contactIdArray]
+ */
 function getSortedContacts () {
 
     var contactArray = [];
@@ -431,15 +440,24 @@ function getSortedContacts () {
     return [contactArray, contactIdArray]
 }
 
+/**
+ * @author (Original Author Unknown)
+ * @author Joan Moser (partial) <Gian.Moser@Unibas.ch>
+ * @author Tom Rodewald (partial) <Tom.Rodewald@Unibas.ch>
+ *
+ * This function gets the sorted Contacts (according to TrustLevel, lowest trust levels are first)
+ * and calls load_contact_item starting from the first contacts.
+ */
 function load_contact_list() {
     document.getElementById("lst:contacts").innerHTML = '';
 
     var sorted = getSortedContacts();
 
-    var contactArray = sorted[0]
-    var contactIdArray = sorted[1]
+    var contactArray = sorted[0] // Array of Contacts
+    var contactIdArray = sorted[1] // Array of IDs (associated with contacts)
 
     for(let j = 0; j < contactArray.length; j++) {
+        // If we hide forgotten contacts and the contact is forgotten, skip to the next contact
         if(tremola.settings.hide_forgotten_contacts && contactArray[j].forgotten) {
             continue
         }
@@ -452,10 +470,10 @@ function load_contact_list() {
  * @author Tom Rodewald <Tom.Rodewald@Unibas.ch>
  *
  * This function smoothly interpolates between two Hex colours with a lerp weight.
- * The lerp weight will decide the strengh of each colour:
+ * The lerp weight will decide the strength of each colour:
  * t = 0 => Resulting colour will be equal to color1
  * t = 0.5 => Resulting colour will be an even mix between the colours
- * t = 1 => Resulting colour will be qeual to color2
+ * t = 1 => Resulting colour will be equal to color2
  *
  * The edge cases are handled like this:
  * t < 0 will set t = 0
@@ -489,7 +507,7 @@ function lerpColor(color1, color2, t) {
  * @author Tom Rodewald <Tom.Rodewald@Unibas.ch>
  *
  * This function smoothly interpolates between two floats with a lerp weight.
- * The lerp weight will decide the strengh of each float.
+ * The lerp weight will decide the strength of each float.
  * The greater t, the stronger b is favoured.
  *
  * The edge cases are handled like this:
@@ -539,7 +557,7 @@ function rgbToHex(r, g, b) {
 }
 
 /**
- * @author (Orignial Author Unknown)
+ * @author (Original Author Unknown)
  * @author Joan Moser (partial) <Gian.Moser@Unibas.ch>
  * @author Tom Rodewald (partial) <Tom.Rodewald@Unibas.ch>
  *
@@ -581,7 +599,7 @@ function load_contact_item(c) {
     // Display the ID of the contact
     row += "<div style='text-overflow: clip; overflow: 'ellipsis';'><font size=-2>" + c[0] + "</font></div></div></button>";
 
-    // This seems to be unused code from previous contributions. Maybe it should be removed? - Joan
+    // >> This seems to be unused code from previous contributions. Maybe it should be removed? - Joan
     // var row  = "<td><button class=contact_picture></button><td style='padding: 5px;'><button class='contact_item_button light w100'>";
     // row += escapeHTML(c[1].alias) + "<br><font size=-2>" + c[0] + "</font></button>";
     // console.log(row);
