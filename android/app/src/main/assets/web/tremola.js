@@ -354,7 +354,7 @@ function load_chat_item(nm) { // appends a button for conversation with name nm 
   if (tremola.chats[nm].forgotten) bg = ' gray'; else bg = ' light';
   row  = "<button class='chat_item_button w100" + bg + "' onclick='load_chat(\"" + nm + "\");' style='overflow: hidden; position: relative;'>";
   row += "<div style='white-space: nowrap;'><div style='text-overflow: ellipsis; overflow: hidden;'>" + tremola.chats[nm].alias + "</div>";
-  row += "<div style='text-overflow: clip; overflow: ellipsis;'><font size=-2>" + escapeHTML(mem) + "</font></div></div>";
+  row += "<div style='text-overflow: clip; overflow: 'ellipsis';'><font size=-2>" + escapeHTML(mem) + "</font></div></div>";
   badgeId = nm + "-badge"
   badge= "<div id='" + badgeId + "' style='display: none; position: absolute; right: 0.5em; bottom: 0.9em; text-align: center; border-radius: 1em; height: 2em; width: 2em; background: var(--red); color: white; font-size: small; line-height:2em;'>&gt;9</div>";
   row += badge + "</button>";
@@ -387,7 +387,7 @@ function load_contact_item(c) { // [ id, { "alias": "thealias", "initial": "T", 
   row  = "<button class=contact_picture style='margin-right: 0.75em; background: " + c[1].color + ";'>" + c[1].initial + "</button>";
   row += "<button class='chat_item_button" + bg + "' style='overflow: hidden; width: calc(100% - 4em);' onclick='show_contact_details(\"" + c[0] + "\");'>";
   row += "<div style='white-space: nowrap;'><div style='text-overflow: ellipsis; overflow: hidden;'>" + escapeHTML(c[1].alias) + "</div>";
-  row += "<div style='text-overflow: clip; overflow: ellipsis;'><font size=-2>" + c[0] + "</font></div></div></button>";
+  row += "<div style='text-overflow: clip; overflow: 'ellipsis';'><font size=-2>" + c[0] + "</font></div></div></button>";
   // var row  = "<td><button class=contact_picture></button><td style='padding: 5px;'><button class='contact_item_button light w100'>";
   // row += escapeHTML(c[1].alias) + "<br><font size=-2>" + c[0] + "</font></button>";
   // console.log(row);
@@ -400,8 +400,8 @@ function fill_members() {
   for (var m in tremola.contacts) {
     choices += '<div style="margin-bottom: 10px;"><label><input type="checkbox" id="' + m;
     choices += '" style="vertical-align: middle;"><div class="contact_item_button light" style="white-space: nowrap; width: calc(100% - 40px); padding: 5px; vertical-align: middle;">';
-    choices += '<div style="text-overflow: ellipis; overflow: hidden;">' + escapeHTML(fid2display(m)) + '</div>';
-    choices += '<div style="text-overflow: ellipis; overflow: hidden;"><font size=-2>' + m + '</font></div>';
+    choices += '<div style="text-overflow: ellipsis; overflow: hidden;">' + escapeHTML(fid2display(m)) + '</div>';
+    choices += '<div style="text-overflow: ellipsis; overflow: hidden;"><font size=-2>' + m + '</font></div>';
     choices += '</div></label></div>\n';
   }
   document.getElementById('lst:members').innerHTML = choices
@@ -499,7 +499,7 @@ function load_peer_list() {
     row  = "<button class='flat buttontext' style='border-radius: 25px; width: 50px; height: 50px; margin-right: 0.75em;" + color + "'><img src=img/signal.svg style='width: 50px; height: 50px; margin-left: -3px; margin-top: -3px; padding: 0px;'></button>";
     row += "<button class='chat_item_button light' style='overflow: hidden; width: calc(100% - 4em);' onclick='show_peer_details(\"" + i + "\");'>";
     row += "<div style='white-space: nowrap;'><div style='text-overflow: ellipsis; overflow: hidden;'>" + tmp[0].substring(4) + nm + "</div>";
-    row += "<div style='text-overflow: clip; overflow: ellipsis;'><font size=-2>" + tmp[1].substring(4) + "</font></div></div></button>";
+    row += "<div style='text-overflow: clip; overflow: 'ellipsis';'><font size=-2>" + tmp[1].substring(4) + "</font></div></div></button>";
     lst += '<div style="padding: 0px 5px 10px 5px;">' + row + '</div>';
     // console.log(row)
   }
