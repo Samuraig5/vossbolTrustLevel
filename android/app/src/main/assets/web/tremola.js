@@ -396,28 +396,49 @@ function load_chat_item(nm) { // appends a button for conversation with name nm 
     set_chats_badge(nm)
 }
 
+function getSortedContacts () {
+
+    var contactArray = [];
+    var contactIdArray = [];
+
+    var i = 0;
+    for (var id in tremola.contacts) {
+        contactArray[i] = tremola.contacts[id];
+        contactIdArray[i] = id;
+        i++;
+    }
+
+    for(var j = 0; j < contactArray.length; j++) {
+        for(var i = j + 1; i < contactArray.length; i++) {
+            if(contactArray[i].levelsOfTrust.trustScore < contactArray[j].levelsOfTrust.trustScore) {
+                var tempContact = contactArray[j];
+                contactArray[j] = contactArray[i];
+                contactArray[i] = tempContact;
+
+                var tempId = contactIdArray[j];
+                contactIdArray[j] = contactIdArray[i];
+                contactIdArray[i] = tempId;
+            }
+        }
+    }
+
+    return [contactArray, contactIdArray]
+}
+
 function load_contact_list() {
     document.getElementById("lst:contacts").innerHTML = '';
 
-    var listOfContacts = tremola.contacts
+    var sorted = getSortedContacts();
 
-    // listOfContacts.sort(function(a, b) {
-    //     return (a.trustScore) - (b.trustScore);
-    // });
+    var contactArray = sorted[0]
+    var contactIdArray = sorted[1]
 
-    for (var id in listOfContacts)
-        if (!tremola.contacts[id].forgotten)
-            load_contact_item([id, tremola.contacts[id]]);
-
-
-
-
-    if (!tremola.settings.hide_forgotten_contacts)
-        for (var id in tremola.contacts) {
-            var c = tremola.contacts[id]
-            if (c.forgotten)
-                load_contact_item([id, c]);
+    for(let j = 0; j < contactArray.length; j++) {
+        if(tremola.settings.hide_forgotten_contacts && contactArray[j].forgotten) {
+            continue
         }
+        load_contact_item([contactIdArray[j], contactArray[j]])
+    }
 }
 
 function lerpColor(color1, color2, t) {
@@ -444,7 +465,7 @@ function hexToRgb(hex) {
     const r = (bigint >> 16) & 255;
     const g = (bigint >> 8) & 255;
     const b = bigint & 255;
-    return { r, g, b };
+    return {r, g, b};
 }
 
 function rgbToHex(r, g, b) {
@@ -462,6 +483,13 @@ function load_contact_item(c) { // [ id, { "alias": "thealias", "initial": "T", 
         c[1]["color"] = colors[Math.floor(colors.length * Math.random())];
         persist();
     }
+
+    if (!("levelsOfTrust" in c[1])) {
+        c[1]["levelsOfTrust"] = trustLevels.Strangers
+        persist();
+    }
+
+
     // console.log("load_c_i", JSON.stringify(c[1]))
     bg = c[1].forgotten ? '#800000' : '#fdfdfd';
 
@@ -505,6 +533,7 @@ function show_contact_details(id) {
     details += '<br><div style="word-break: break-all;">SSB identity: &nbsp;<tt>' + id + '</tt></div>\n';
     details += '<br><div style="word-break: break-all;">Trust Level: &nbsp;<tt>' + c.levelsOfTrust.trustName + '</tt></div>\n';
     details += '<br><div class=settings style="padding: 0px;"><div class=settingsText>Forget this contact</div><div style="float: right;"><label class="switch"><input id="hide_contact" type="checkbox" onchange="toggle_forget_contact(this);"><span class="slider round"></span></label></div></div>'
+    details += '<br><div class=settings style="padding: 0px;"><div class=settingsText>Change trust level</div><div style="float: right;"><label class="switch"><input id="hide_contact" type="checkbox" onchange="change_contact_trustLevel(this);"><span class="slider round"></span></label></div></div>'
     document.getElementById('old_contact_details').innerHTML = details;
     document.getElementById('old_contact-overlay').style.display = 'initial';
     document.getElementById('overlay-bg').style.display = 'initial';
@@ -517,6 +546,14 @@ function show_contact_details(id) {
 function toggle_forget_contact(e) {
     var c = tremola.contacts[new_contact_id];
     c.forgotten = !c.forgotten;
+    persist();
+    closeOverlay();
+    load_contact_list();
+}
+
+function change_contact_trustLevel(e) {
+    var c = tremola.contacts[new_contact_id];
+    c.levelsOfTrust = trustLevels.Friends
     persist();
     closeOverlay();
     load_contact_list();
