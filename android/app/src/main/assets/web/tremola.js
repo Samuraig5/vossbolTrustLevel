@@ -17,10 +17,10 @@ var curr_img_candidate = null;
 var pubs = []
 
 const trustLevels = Object.freeze({
-    Restricted: {level: 3, tintColour: '#232323'},
-    Strangers: {level: 2, tintColour: '#f13b3b'},
-    Acquaintance: {level: 1, tintColour: '#d7de30'},
-    Friends: {level: 0, tintColour: '#4ebc2e'},
+    Restricted: {trustScore: 3, tintColour: '#232323'},
+    Strangers: {trustScore: 2, tintColour: '#f13b3b'},
+    Acquaintance: {trustScore: 1, tintColour: '#d7de30'},
+    Friends: {trustScore: 0, tintColour: '#4ebc2e'},
 });
 
 // --- menu callbacks
@@ -398,9 +398,20 @@ function load_chat_item(nm) { // appends a button for conversation with name nm 
 
 function load_contact_list() {
     document.getElementById("lst:contacts").innerHTML = '';
-    for (var id in tremola.contacts)
+
+    var listOfContacts = tremola.contacts
+
+    // listOfContacts.sort(function(a, b) {
+    //     return (a.trustScore) - (b.trustScore);
+    // });
+
+    for (var id in listOfContacts)
         if (!tremola.contacts[id].forgotten)
             load_contact_item([id, tremola.contacts[id]]);
+
+
+
+
     if (!tremola.settings.hide_forgotten_contacts)
         for (var id in tremola.contacts) {
             var c = tremola.contacts[id]
@@ -454,9 +465,9 @@ function load_contact_item(c) { // [ id, { "alias": "thealias", "initial": "T", 
     // console.log("load_c_i", JSON.stringify(c[1]))
     bg = c[1].forgotten ? '#800000' : '#fdfdfd';
 
-    bg = lerpColor(bg, c[1].levelsOfTrust.tintColour, 0.5)
+    bg = lerpColor(bg, c[1].levelsOfTrust.tintColour, 0.3)
 
-    row = "<button class=contact_picture style='margin-right: 0.75em; background: " + c[1].color + ";'>" + c[1].initial + "</button>";
+    row = "<button class=contact_picture style='margin-right: 0.75em; background: " + c[1].color + ";'>" + c[1].initial + " " + c[1].levelsOfTrust.trustScore + "</button>";
     row += "<button class='chat_item_button' style='overflow: hidden; width: calc(100% - 4em); background-color: " + bg + ";' onclick='show_contact_details(\"" + c[0] + "\");'>";
     row += "<div style='white-space: nowrap;'><div style='text-overflow: ellipsis; overflow: hidden;'>" + escapeHTML(c[1].alias) + "</div>";
     row += "<div style='text-overflow: clip; overflow: 'ellipsis';'><font size=-2>" + c[0] + "</font></div></div></button>";
