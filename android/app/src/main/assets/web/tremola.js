@@ -124,12 +124,16 @@ function edit_confirmed() {
         document.getElementById('contact_id').value = '';
         if (val == '')
             val = id2b32(new_contact_id);
-        tremola.contacts[new_contact_id] = { "alias" : val, "initial": val.substring(0,1).toUpperCase(),
-            "color": colors[Math.floor(colors.length*Math.random())] };
+        tremola.contacts[new_contact_id] = {
+            "alias": val, "initial": val.substring(0, 1).toUpperCase(),
+            "color": colors[Math.floor(colors.length * Math.random())]
+        };
         var recps = [myId, new_contact_id];
         var nm = recps2nm(recps);
-        tremola.chats[nm] = { "alias": "Chat w/ "+val, "posts":{}, "members":recps,
-            "touched": Date.now(), "lastRead": 0 };
+        tremola.chats[nm] = {
+            "alias": "Chat w/ " + val, "posts": {}, "members": recps,
+            "touched": Date.now(), "lastRead": 0
+        };
         persist();
         backend("add:contact " + new_contact_id + " " + btoa(val))
         menu_redraw();
@@ -146,7 +150,7 @@ function menu_forget_conv() {
         launch_snackbar("cannot be applied to own notes");
         return;
     }
-    tremola.chats[curr_chat].forgotten = !tremola.chats[curr_chat].forgotten ;
+    tremola.chats[curr_chat].forgotten = !tremola.chats[curr_chat].forgotten;
     persist();
     load_chat_list() // refresh list of conversations
     closeOverlay();
@@ -196,7 +200,9 @@ function menu_pick_image() {
 // ---
 
 function new_text_post(s) {
-    if (s.length == 0) { return; }
+    if (s.length == 0) {
+        return;
+    }
     var draft = unicodeStringToTypedArray(document.getElementById('draft').value); // escapeHTML(
     var recps;
     if (curr_chat == "ALL") {
@@ -207,9 +213,10 @@ function new_text_post(s) {
     backend("publ:post " + btoa(draft) + " null") //  + recps)
     document.getElementById('draft').value = '';
     closeOverlay();
-    setTimeout(function() { // let image rendering (fetching size) take place before we scroll
+    setTimeout(function () { // let image rendering (fetching size) take place before we scroll
         var c = document.getElementById('core');
-        c.scrollTop = c.scrollHeight; }, 100);
+        c.scrollTop = c.scrollHeight;
+    }, 100);
 }
 
 function new_voice_post(voice_b64) {
@@ -222,15 +229,17 @@ function new_voice_post(voice_b64) {
     document.getElementById('draft').value = '';
 }
 
-function play_voice(nm,ref) {
+function play_voice(nm, ref) {
     var p = tremola.chats[nm].posts[ref];
     var d = new Date(p["when"]);
-    d = d.toDateString() + ' ' + d.toTimeString().substring(0,5);
+    d = d.toDateString() + ' ' + d.toTimeString().substring(0, 5);
     backend("play:voice " + p["voice"] + " " + btoa(fid2display(p["from"])) + " " + btoa(d));
 }
 
 function new_image_post() {
-    if (curr_img_candidate == null) { return; }
+    if (curr_img_candidate == null) {
+        return;
+    }
     var draft = "![](" + curr_img_candidate + ")\n";
     var caption = document.getElementById('image-caption').value;
     if (caption && caption.length > 0)
@@ -239,9 +248,10 @@ function new_image_post() {
     backend("priv:post " + btoa(draft) + " " + recps);
     curr_img_candidate = null;
     closeOverlay();
-    setTimeout(function() { // let image rendering (fetching size) take place before we scroll
+    setTimeout(function () { // let image rendering (fetching size) take place before we scroll
         var c = document.getElementById('core');
-        c.scrollTop = c.scrollHeight; }, 100);
+        c.scrollTop = c.scrollHeight;
+    }, 100);
 }
 
 function load_post_item(p) { // { 'key', 'from', 'when', 'body', 'to' (if group or public)>
@@ -266,7 +276,7 @@ function load_post_item(p) { // { 'key', 'from', 'when', 'body', 'to' (if group 
         box += "<span style='color: red;'>&#x1f50a;</span>&nbsp;&nbsp;"
     box += txt
     var d = new Date(p["when"]);
-    d = d.toDateString() + ' ' + d.toTimeString().substring(0,5);
+    d = d.toDateString() + ' ' + d.toTimeString().substring(0, 5);
     box += "<div align=right style='font-size: x-small;'><i>";
     box += d + "</i></div></div>";
     var row;
@@ -276,7 +286,7 @@ function load_post_item(p) { // { 'key', 'from', 'when', 'body', 'to' (if group 
         // row  = "<td style='vertical-align: top; color: var(--red); font-weight: 900;'>&gt;"
         row += "<td colspan=2 style='padding-bottom: 10px;'>" + box + "<td colspan=2>";
     } else {
-        row  = "<td colspan=2><td colspan=2 style='padding-bottom: 10px;'>" + box;
+        row = "<td colspan=2><td colspan=2 style='padding-bottom: 10px;'>" + box;
         row += "<td style='vertical-align: top; color: var(--red); font-weight: 900;'>&lt;"
     }
     pl.insertRow(pl.rows.length).innerHTML = row;
@@ -286,23 +296,30 @@ function load_chat(nm) {
     var ch, pl, e;
     ch = tremola.chats[nm]
     pl = document.getElementById("lst:posts");
-    while(pl.rows.length) { pl.deleteRow(0); }
+    while (pl.rows.length) {
+        pl.deleteRow(0);
+    }
     pl.insertRow(0).innerHTML = "<tr><td>&nbsp;<td>&nbsp;<td>&nbsp;<td>&nbsp;<td>&nbsp;</tr>";
     curr_chat = nm;
     var lop = []; // list of posts
     for (var p in ch.posts) lop.push(p)
-    lop.sort( function (a,b) { return ch.posts[a].when - ch.posts[b].when } )
-    lop.forEach( function (p) { load_post_item(ch.posts[p]) } )
+    lop.sort(function (a, b) {
+        return ch.posts[a].when - ch.posts[b].when
+    })
+    lop.forEach(function (p) {
+        load_post_item(ch.posts[p])
+    })
     load_chat_title(ch);
     setScenario("posts");
     document.getElementById("tremolaTitle").style.display = 'none';
     // update unread badge:
     ch["lastRead"] = Date.now();
     persist();
-    document.getElementById(nm+'-badge').style.display = 'none' // is this necessary?
-    setTimeout(function() { // let image rendering (fetching size) take place before we scroll
+    document.getElementById(nm + '-badge').style.display = 'none' // is this necessary?
+    setTimeout(function () { // let image rendering (fetching size) take place before we scroll
         var c = document.getElementById('core');
-        c.scrollTop = c.scrollHeight; }, 100);
+        c.scrollTop = c.scrollHeight;
+    }, 100);
     /*
     // scroll to bottom:
     var c = document.getElementById('core');
@@ -316,13 +333,12 @@ function load_chat_title(ch) {
     var c = document.getElementById("conversationTitle"), bg, box;
     c.style.display = null;
     c.setAttribute('classList', ch.forgotten ? 'gray' : '') // old JS (SDK 23)
-    box  = "<div style='white-space: nowrap;'><div style='text-overflow: ellipsis; overflow: hidden;'><font size=+1><strong>" + escapeHTML(ch.alias) + "</strong></font></div>";
+    box = "<div style='white-space: nowrap;'><div style='text-overflow: ellipsis; overflow: hidden;'><font size=+1><strong>" + escapeHTML(ch.alias) + "</strong></font></div>";
     box += "<div style='color: black; text-overflow: ellipsis; overflow: hidden;'>" + escapeHTML(recps2display(ch.members)) + "</div></div>";
     c.innerHTML = box;
 }
 
-function load_chat_list()
-{
+function load_chat_list() {
     var meOnly = recps2nm([myId])
     // console.log('meOnly', meOnly)
     document.getElementById('lst:chats').innerHTML = '';
@@ -332,8 +348,12 @@ function load_chat_list()
         if (p != meOnly && !tremola.chats[p]['forgotten'])
             lop.push(p)
     }
-    lop.sort( function (a,b) { return tremola.chats[b]["touched"] - tremola.chats[a]["touched"] } )
-    lop.forEach( function (p) { load_chat_item(p) } )
+    lop.sort(function (a, b) {
+        return tremola.chats[b]["touched"] - tremola.chats[a]["touched"]
+    })
+    lop.forEach(function (p) {
+        load_chat_item(p)
+    })
     // forgotten chats: unsorted
     if (!tremola.settings.hide_forgotten_conv)
         for (var p in tremola.chats)
@@ -354,11 +374,11 @@ function load_chat_item(nm) { // appends a button for conversation with name nm 
     // item.style = "padding: 0px 5px 10px 5px; margin: 3px 3px 6px 3px;";
     item.setAttribute('class', 'chat_item_div'); // old JS (SDK 23)
     if (tremola.chats[nm].forgotten) bg = ' gray'; else bg = ' light';
-    row  = "<button class='chat_item_button w100" + bg + "' onclick='load_chat(\"" + nm + "\");' style='overflow: hidden; position: relative;'>";
+    row = "<button class='chat_item_button w100" + bg + "' onclick='load_chat(\"" + nm + "\");' style='overflow: hidden; position: relative;'>";
     row += "<div style='white-space: nowrap;'><div style='text-overflow: ellipsis; overflow: hidden;'>" + tremola.chats[nm].alias + "</div>";
     row += "<div style='text-overflow: clip; overflow: 'ellipsis';'><font size=-2>" + escapeHTML(mem) + "</font></div></div>";
     badgeId = nm + "-badge"
-    badge= "<div id='" + badgeId + "' style='display: none; position: absolute; right: 0.5em; bottom: 0.9em; text-align: center; border-radius: 1em; height: 2em; width: 2em; background: var(--red); color: white; font-size: small; line-height:2em;'>&gt;9</div>";
+    badge = "<div id='" + badgeId + "' style='display: none; position: absolute; right: 0.5em; bottom: 0.9em; text-align: center; border-radius: 1em; height: 2em; width: 2em; background: var(--red); color: white; font-size: small; line-height:2em;'>&gt;9</div>";
     row += badge + "</button>";
     row += ""
     item.innerHTML = row;
@@ -382,11 +402,17 @@ function load_contact_list() {
 function load_contact_item(c) { // [ id, { "alias": "thealias", "initial": "T", "color": "#123456" } ] }
     var row, item = document.createElement('div'), bg;
     item.setAttribute('style', 'padding: 0px 5px 10px 5px;'); // old JS (SDK 23)
-    if (!("initial" in c[1])) { c[1]["initial"] = c[1].alias.substring(0,1).toUpperCase(); persist(); }
-    if (!("color" in c[1])) { c[1]["color"] = colors[Math.floor(colors.length * Math.random())]; persist(); }
+    if (!("initial" in c[1])) {
+        c[1]["initial"] = c[1].alias.substring(0, 1).toUpperCase();
+        persist();
+    }
+    if (!("color" in c[1])) {
+        c[1]["color"] = colors[Math.floor(colors.length * Math.random())];
+        persist();
+    }
     // console.log("load_c_i", JSON.stringify(c[1]))
     bg = c[1].forgotten ? ' gray' : ' light';
-    row  = "<button class=contact_picture style='margin-right: 0.75em; background: " + c[1].color + ";'>" + c[1].initial + "</button>";
+    row = "<button class=contact_picture style='margin-right: 0.75em; background: " + c[1].color + ";'>" + c[1].initial + "</button>";
     row += "<button class='chat_item_button" + bg + "' style='overflow: hidden; width: calc(100% - 4em);' onclick='show_contact_details(\"" + c[0] + "\");'>";
     row += "<div style='white-space: nowrap;'><div style='text-overflow: ellipsis; overflow: hidden;'>" + escapeHTML(c[1].alias) + "</div>";
     row += "<div style='text-overflow: clip; overflow: 'ellipsis';'><font size=-2>" + c[0] + "</font></div></div></button>";
@@ -445,8 +471,8 @@ function save_content_alias() {
     if (val == '')
         val = id2b32(new_contact_id);
     tremola.contacts[new_contact_id].alias = val;
-    tremola.contacts[new_contact_id].initial = val.substring(0,1).toUpperCase();
-    tremola.contacts[new_contact_id].color = colors[Math.floor(colors.length*Math.random())];
+    tremola.contacts[new_contact_id].initial = val.substring(0, 1).toUpperCase();
+    tremola.contacts[new_contact_id].color = colors[Math.floor(colors.length * Math.random())];
     persist();
     menu_redraw();
     closeOverlay();
@@ -476,8 +502,10 @@ function new_conversation() {
     }
     var nm = recps2nm(recps);
     if (!(nm in tremola.chats)) {
-        tremola.chats[nm] = { "alias": "Unnamed conversation", "posts": {},
-            "members": recps, "touched": Date.now() };
+        tremola.chats[nm] = {
+            "alias": "Unnamed conversation", "posts": {},
+            "members": recps, "touched": Date.now()
+        };
         persist();
     } else
         tremola.chats[nm]["touched"] = Date.now()
@@ -498,7 +526,7 @@ function load_peer_list() {
             nm = ' / ' + tremola.contacts[nm].alias
         else
             nm = ''
-        row  = "<button class='flat buttontext' style='border-radius: 25px; width: 50px; height: 50px; margin-right: 0.75em;" + color + "'><img src=img/signal.svg style='width: 50px; height: 50px; margin-left: -3px; margin-top: -3px; padding: 0px;'></button>";
+        row = "<button class='flat buttontext' style='border-radius: 25px; width: 50px; height: 50px; margin-right: 0.75em;" + color + "'><img src=img/signal.svg style='width: 50px; height: 50px; margin-left: -3px; margin-top: -3px; padding: 0px;'></button>";
         row += "<button class='chat_item_button light' style='overflow: hidden; width: calc(100% - 4em);' onclick='show_peer_details(\"" + i + "\");'>";
         row += "<div style='white-space: nowrap;'><div style='text-overflow: ellipsis; overflow: hidden;'>" + tmp[0].substring(4) + nm + "</div>";
         row += "<div style='text-overflow: clip; overflow: 'ellipsis';'><font size=-2>" + tmp[1].substring(4) + "</font></div></div></button>";
@@ -525,7 +553,7 @@ function getUnreadCnt(nm) {
 }
 
 function set_chats_badge(nm) {
-    var e = document.getElementById(nm+'-badge'), cnt;
+    var e = document.getElementById(nm + '-badge'), cnt;
     cnt = getUnreadCnt(nm)
     if (cnt == 0) {
         e.style.display = 'none';
@@ -540,14 +568,14 @@ function set_chats_badge(nm) {
 
 function unicodeStringToTypedArray(s) {
     var escstr = encodeURIComponent(s);
-    var binstr = escstr.replace(/%([0-9A-F]{2})/g, function(match, p1) {
+    var binstr = escstr.replace(/%([0-9A-F]{2})/g, function (match, p1) {
         return String.fromCharCode('0x' + p1);
     });
     return binstr;
 }
 
 function toHex(s) {
-    return Array.from(s, function(c) {
+    return Array.from(s, function (c) {
         return ('0' + (c.charCodeAt(0) & 0xFF).toString(16)).slice(-2);
     }).join('')
 }
@@ -569,37 +597,40 @@ function b32encode(bytes) {
         buf[i] = bytes.charCodeAt(i);
     }
     while (buf.length > 0) {
-        b32 += b32enc_do40bits(buf.slice(0,5));
+        b32 += b32enc_do40bits(buf.slice(0, 5));
         buf = buf.slice(5, buf.length);
     }
     if (cnt != 0) {
         cnt = Math.floor(8 * (5 - cnt) / 5);
-        b32 = b32.substring(0,b32.length - cnt) + '======'.substring(0,cnt)
+        b32 = b32.substring(0, b32.length - cnt) + '======'.substring(0, cnt)
     }
     return b32;
 }
 
 function id2b32(str) { // derive a shortname from the SSB id
     try {
-        var b = atob(str.slice(1,-9)); // atob(str.substr(1, str.length-9));
-        b = b32encode(b.slice(0,7)).substr(0,10);
-        return b.substring(0,5) + '-' + b.substring(5);
-    } catch(err) {}
+        var b = atob(str.slice(1, -9)); // atob(str.substr(1, str.length-9));
+        b = b32encode(b.slice(0, 7)).substr(0, 10);
+        return b.substring(0, 5) + '-' + b.substring(5);
+    } catch (err) {
+    }
     return '??'
 }
 
-function escapeHTML(str){
+function escapeHTML(str) {
     return new Option(str).innerHTML;
 }
 
 function recps2nm(rcps) { // use concat of sorted FIDs as internal name for conversation
     return "ALL";
-    return rcps.sort().join('').replace(/.ed25519/g,'');
+    return rcps.sort().join('').replace(/.ed25519/g, '');
 }
 
 function recps2display(rcps) {
     if (rcps == null) return 'ALL';
-    var lst = rcps.map( function (fid) { return fid2display(fid) } );
+    var lst = rcps.map(function (fid) {
+        return fid2display(fid)
+    });
     return '[' + lst.join(', ') + ']';
 }
 
@@ -608,14 +639,17 @@ function fid2display(fid) {
     if (fid in tremola.contacts)
         a = tremola.contacts[fid].alias;
     if (a == '')
-        a = fid.substring(0,9);
+        a = fid.substring(0, 9);
     return a;
 }
 
 // --- Interface to Kotlin side and local (browser) storage
 
 function backend(cmdStr) { // send this to Kotlin (or simulate in case of browser-only testing)
-    if (typeof Android != 'undefined') { Android.onFrontendRequest(cmdStr); return; }
+    if (typeof Android != 'undefined') {
+        Android.onFrontendRequest(cmdStr);
+        return;
+    }
     cmdStr = cmdStr.split(' ')
     if (cmdStr[0] == 'ready')
         b2f_initialize('@AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=.ed25519')
@@ -623,10 +657,13 @@ function backend(cmdStr) { // send this to Kotlin (or simulate in case of browse
         b2f_showSecret('secret_of_id_which_is@AAAA==.ed25519')
     else if (cmdStr[0] == 'priv:post') {
         var draft = atob(cmdStr[1])
-        cmdStr.splice(0,2)
-        var e = { 'header': {'tst': Date.now(),
-                'ref': Math.floor(1000000*Math.random()),
-                'fid': myId},
+        cmdStr.splice(0, 2)
+        var e = {
+            'header': {
+                'tst': Date.now(),
+                'ref': Math.floor(1000000 * Math.random()),
+                'fid': myId
+            },
             'confid': {'type': 'post', 'text': draft, 'recps': cmdStr},
             'public': {}
         }
@@ -649,17 +686,17 @@ function resetTremola() { // wipes browser-side content
     // tremola.chats[n] = { "alias":"local notes (for my eyes only)", "posts":{}, "forgotten":false,
     //                      "members":[myId], "touched": Date.now(), "lastRead": 0 };
     tremola.chats["ALL"] = {
-        "alias":"Public channel",
-        "posts":{},
-        "members":["ALL"],
+        "alias": "Public channel",
+        "posts": {},
+        "members": ["ALL"],
         "touched": Date.now(),
         "lastRead": 0
     };
     tremola.contacts[myId] = {
-        "alias":"me",
+        "alias": "me",
         "initial": "M",
         "color": "#bd7578",
-        "forgotten":false,
+        "forgotten": false,
         "levelsOfTrust": trustLevels[3]
     };
     persist();
@@ -670,10 +707,10 @@ function persist() {
     window.localStorage.setItem("tremola", JSON.stringify(tremola));
 }
 
-function b2f_local_peer(p,status) { // wireless peer: online, offline, connected, disconnected
+function b2f_local_peer(p, status) { // wireless peer: online, offline, connected, disconnected
     console.log("local peer", p, status);
     if (!(p in localPeers))
-        localPeers[p] = [false,false]
+        localPeers[p] = [false, false]
     if (status == 'online') localPeers[p][0] = true
     if (status == 'offline') localPeers[p][0] = false
     if (status == 'connected') localPeers[p][1] = true
@@ -684,23 +721,27 @@ function b2f_local_peer(p,status) { // wireless peer: online, offline, connected
 }
 
 function b2f_new_event(e) { // incoming SSB log event: we get map with three entries
-                            // console.log('hdr', JSON.stringify(e.header))
-                            // console.log('pub', JSON.stringify(e.public))
-                            // console.log('cfd', JSON.stringify(e.confid))
+    // console.log('hdr', JSON.stringify(e.header))
+    // console.log('pub', JSON.stringify(e.public))
+    // console.log('cfd', JSON.stringify(e.confid))
     if (e.public) {
         if (e.public[0] != 'TAV') return; // text and voice
         console.log("new post 0 ", tremola)
         var conv_name = "ALL";
         if (!(conv_name in tremola.chats)) { // create new conversation if needed
             console.log("xx")
-            tremola.chats[conv_name] = { "alias":"Public channel X", "posts":{},
-                "members":["ALL"], "touched": Date.now(), "lastRead": 0 };
+            tremola.chats[conv_name] = {
+                "alias": "Public channel X", "posts": {},
+                "members": ["ALL"], "touched": Date.now(), "lastRead": 0
+            };
             load_chat_list()
         }
         if (!(e.header.fid in tremola.contacts)) {
             var a = id2b32(e.header.fid);
-            tremola.contacts[e.header.fid] = { "alias": a, "initial": a.substring(0,1).toUpperCase(),
-                "color": colors[Math.floor(colors.length * Math.random())] }
+            tremola.contacts[e.header.fid] = {
+                "alias": a, "initial": a.substring(0, 1).toUpperCase(),
+                "color": colors[Math.floor(colors.length * Math.random())]
+            }
             load_contact_list()
         }
         console.log("new post 1")
@@ -713,8 +754,10 @@ function b2f_new_event(e) { // incoming SSB log event: we get map with three ent
             // var txt = null;
             // if (a[1] != null)
             //   txt = a[1];
-            var p = {"key": e.header.ref, "from": e.header.fid, "body": a[1],
-                "voice": a[2], "when": a[3] * 1000};
+            var p = {
+                "key": e.header.ref, "from": e.header.fid, "body": a[1],
+                "voice": a[2], "when": a[3] * 1000
+            };
             console.log("new post 2 ", p)
             ch["posts"][e.header.ref] = p;
             if (ch["touched"] < e.header.tst)
@@ -732,16 +775,20 @@ function b2f_new_event(e) { // incoming SSB log event: we get map with three ent
     } else if (e.confid && e.confid.type == "post") {
         var i, conv_name = recps2nm(e.confid.recps);
         if (!(conv_name in tremola.chats)) { // create new conversation if needed
-            tremola.chats[conv_name] = { "alias":"Unnamed conversation", "posts":{},
-                "members":e.confid.recps, "touched": Date.now(), "lastRead": 0 };
+            tremola.chats[conv_name] = {
+                "alias": "Unnamed conversation", "posts": {},
+                "members": e.confid.recps, "touched": Date.now(), "lastRead": 0
+            };
             load_chat_list()
         }
         for (i in e.confid.recps) {
             var id, r = e.confid.recps[i];
             if (!(r in tremola.contacts)) {
                 var a = id2b32(r);
-                tremola.contacts[r] = { "alias": a, "initial": a.substring(0,1).toUpperCase(),
-                    "color": colors[Math.floor(colors.length * Math.random())] }
+                tremola.contacts[r] = {
+                    "alias": a, "initial": a.substring(0, 1).toUpperCase(),
+                    "color": colors[Math.floor(colors.length * Math.random())]
+                }
                 load_contact_list()
             }
         }
@@ -749,7 +796,7 @@ function b2f_new_event(e) { // incoming SSB log event: we get map with three ent
         if (!(e.header.ref in ch.posts)) { // new post
             // var d = new Date(e.header.tst);
             // d = d.toDateString() + ' ' + d.toTimeString().substring(0,5);
-            var p = {"key": e.header.ref, "from": e.header.fid, "body": e.confid.text, "when": e.header.tst };
+            var p = {"key": e.header.ref, "from": e.header.fid, "body": e.confid.text, "when": e.header.tst};
             ch["posts"][e.header.ref] = p;
             if (ch["touched"] < e.header.tst)
                 ch["touched"] = e.header.tst
@@ -776,7 +823,7 @@ function b2f_new_voice(voice_b64) {
     new_voice_post(voice_b64)
 }
 
-function b2f_showSecret(json){
+function b2f_showSecret(json) {
     setScenario(prev_scenario);
     generateQR(json)
 }
