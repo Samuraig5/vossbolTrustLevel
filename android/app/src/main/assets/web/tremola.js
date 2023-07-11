@@ -489,11 +489,11 @@ function getSortedContacts () {
     var contactArray = [];
     var contactIdArray = [];
 
-    var i = 0;
+    var iterator = 0;
     for (var id in tremola.contacts) {
-        contactArray[i] = tremola.contacts[id];
-        contactIdArray[i] = id;
-        i++;
+        contactArray[iterator] = tremola.contacts[id];
+        contactIdArray[iterator] = id;
+        iterator++;
     }
 
     for(var j = 0; j < contactArray.length; j++) {
