@@ -517,30 +517,47 @@ function rgbToHex(r, g, b) {
     return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, "0")}`;
 }
 
-function load_contact_item(c) { // [ id, { "alias": "thealias", "initial": "T", "color": "#123456" } ] }
+/**
+ * @author (Orignial Author Unknown)
+ * @author Joan Moser (partial) <Gian.Moser@Unibas.ch>
+ * @author Tom Rodewald (partial) <Tom.Rodewald@Unibas.ch>
+ *
+ * This function generates the 'Icon' circle and the contact bar for a given contact in the contact list
+ *
+ * @param c Contact of format: [ id, { "alias": "thealias", "initial": "T", "color": "#123456" } ]
+ */
+function load_contact_item(c) {
+    // Create the 'Icon' circle and the contact bar
     var row, item = document.createElement('div'), bg;
     item.setAttribute('style', 'padding: 0px 5px 10px 5px;'); // old JS (SDK 23)
+    // If no Initial is set, take first letter of alias
     if (!("initial" in c[1])) {
         c[1]["initial"] = c[1].alias.substring(0, 1).toUpperCase();
         persist();
     }
+    // If no colour is set, take random colour from predefined list of colours
     if (!("color" in c[1])) {
         c[1]["color"] = colors[Math.floor(colors.length * Math.random())];
         persist();
     }
     // console.log("load_c_i", JSON.stringify(c[1]))
     bg = c[1].forgotten ? '#800000' : '#fdfdfd';
-
     //This will lerp the background of the contact with the associated with the colour of the contacts trust level.
     bg = lerpColor(bg, c[1].levelsOfTrust.tintColour, 0.3)
-
+    // Create the 'Icon' Circle
     row = "<button class=contact_picture style='margin-right: 0.75em; background: " + c[1].color + ";'>" + c[1].initial + " " + c[1].levelsOfTrust.trustScore + "</button>";
+    // Create the Contact Bar
     row += "<button class='chat_item_button' style='overflow: hidden; width: calc(100% - 4em); background-color: " + bg + ";' onclick='show_contact_details(\"" + c[0] + "\");'>";
+    // Display the Alias of the Contact
     row += "<div style='white-space: nowrap;'><div style='text-overflow: ellipsis; overflow: hidden;'>" + escapeHTML(c[1].alias) + "</div>";
+    // Display the ID of the contact
     row += "<div style='text-overflow: clip; overflow: 'ellipsis';'><font size=-2>" + c[0] + "</font></div></div></button>";
+
+    // This seems to be unused code from previous contributions. Maybe it should be removed? - Joan
     // var row  = "<td><button class=contact_picture></button><td style='padding: 5px;'><button class='contact_item_button light w100'>";
     // row += escapeHTML(c[1].alias) + "<br><font size=-2>" + c[0] + "</font></button>";
     // console.log(row);
+
     item.innerHTML = row;
     document.getElementById('lst:contacts').appendChild(item);
 }
