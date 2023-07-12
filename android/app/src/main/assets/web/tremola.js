@@ -280,6 +280,7 @@ function menu_pick_image() {
 
 // ---
 
+
 function new_text_post(s) {
     if (s.length == 0) {
         return;
@@ -708,8 +709,25 @@ function show_contact_details(id) {
     details += '<br><div>Shortname: &nbsp;' + id2b32(id) + '</div>\n';
     details += '<br><div style="word-break: break-all;">SSB identity: &nbsp;<tt>' + id + '</tt></div>\n';
     details += '<br><div style="word-break: break-all;">Trust Level: &nbsp;<tt>' + c.levelsOfTrust.trustName + '</tt></div>\n';
+
+    // Generate dropdown options dynamically from trustLevels enum
+    var trustOptions = '';
+    for (var trustLevel in trustLevels) {
+        trustOptions += '<option value="' + trustLevel + '">' + trustLevels[trustLevel].trustName + '</option>';
+    }
+
+    // Replace checkbox with select dropdown
+    details += '<br>' +
+        '<div class=settings style="padding: 0px;">' +
+            '<div class=settingsText>Change trust level</div>' +
+            '<div style="float: right;">' +
+                '<select id="change_trust_level" onchange="change_contact_trustLevel(this);">' +
+                    trustOptions +
+                '</select>' +
+            '</div>' +
+        '</div>';
+
     details += '<br><div class=settings style="padding: 0px;"><div class=settingsText>Forget this contact</div><div style="float: right;"><label class="switch"><input id="hide_contact" type="checkbox" onchange="toggle_forget_contact(this);"><span class="slider round"></span></label></div></div>'
-    details += '<br><div class=settings style="padding: 0px;"><div class=settingsText>Change trust level</div><div style="float: right;"><label class="switch"><input id="hide_contact" type="checkbox" onchange="change_contact_trustLevel(this);"><span class="slider round"></span></label></div></div>'
     document.getElementById('old_contact_details').innerHTML = details;
     document.getElementById('old_contact-overlay').style.display = 'initial';
     document.getElementById('overlay-bg').style.display = 'initial';
@@ -729,10 +747,13 @@ function toggle_forget_contact(e) {
 
 function change_contact_trustLevel(e) {
     var c = tremola.contacts[new_contact_id];
-    c.levelsOfTrust = trustLevels.Friends
-    persist();
-    closeOverlay();
-    load_contact_list();
+    var selectedTrustLevel = e.value;
+    if (selectedTrustLevel in trustLevels) {
+        c.levelsOfTrust = trustLevels[selectedTrustLevel];
+        persist();
+        closeOverlay();
+        load_contact_list();
+    }
 }
 
 function save_content_alias() {
