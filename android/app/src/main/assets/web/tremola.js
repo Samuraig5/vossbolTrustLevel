@@ -709,14 +709,23 @@ function fill_members() {
     document.getElementById(myId).disabled = true;
 }
 
+/**
+ * @author (Original Author Unknown)
+ * @author Joan Moser (partial) <Gian.Moser@Unibas.ch>
+ * @author Tom Rodewald (partial) <Tom.Rodewald@Unibas.ch>
+ *
+ * This function generates the 'Contact Details' window and displays it
+ *
+ * @param id id of the contact who's details should be shown
+ */
 function show_contact_details(id) {
     var c = tremola.contacts[id];
     new_contact_id = id;
     document.getElementById('old_contact_alias').value = c['alias'];
     var details = '';
-    details += '<br><div>Shortname: &nbsp;' + id2b32(id) + '</div>\n';
-    details += '<br><div style="word-break: break-all;">SSB identity: &nbsp;<tt>' + id + '</tt></div>\n';
-    details += '<br><div style="word-break: break-all;">Trust Level: &nbsp;<tt>' + c.levelsOfTrust.trustName + '</tt></div>\n';
+    details += '<br><div>Shortname: &nbsp;' + id2b32(id) + '</div>\n'; // Display the short name
+    details += '<br><div style="word-break: break-all;">SSB identity: &nbsp;<tt>' + id + '</tt></div>\n'; // Display the id
+    details += '<br><div style="word-break: break-all;">Trust Level: &nbsp;<tt>' + c.levelsOfTrust.trustName + '</tt></div>\n'; // Display current turst level
 
     // Generate dropdown options dynamically from trustLevels enum
     var trustOptions = '';
@@ -759,8 +768,17 @@ function toggle_forget_contact(e) {
     load_contact_list();
 }
 
+/**
+ * @author Joan Moser <Gian.Moser@Unibas.ch>
+ * @author Tom Rodewald <Tom.Rodewald@Unibas.ch>
+ *
+ * This function is triggered when the user selects a new trust level for a contact.
+ * It will find that contact and change its trust level to what the user selected.
+ *
+ * @param e Event that has triggered this function
+ */
 function change_contact_trustLevel(e) {
-    var c = tremola.contacts[new_contact_id];
+    var c = tremola.contacts[new_contact_id]; //new_contact_id is the id of the currently selected contact
     var selectedTrustLevel = e.value;
     if (selectedTrustLevel in trustLevels) {
         c.levelsOfTrust = trustLevels[selectedTrustLevel];
