@@ -31,6 +31,7 @@ const trustLevels = Object.freeze({
 
 // --- menu callbacks
 
+// > This code has been commented out by previous contributors. Maybe delete it? - Joan
 /*
 function menu_sync() {
   if (localPeers.length == 0)
@@ -124,10 +125,23 @@ function menu_edit_convname() {
     menu_edit('convNameTarget', "Edit conversation name:<br>(only you can see this name)", tremola.chats[curr_chat].alias);
 }
 
+// > This code has been commented out by previous contributors. Maybe delete it? - Joan
 // function menu_edit_new_contact_alias() {
 //   menu_edit('new_contact_alias', "Assign alias to new contact:", "");
 // }
 
+/**
+ * @author (Original Author Unknown)
+ * @author Joan Moser (partial) <Gian.Moser@Unibas.ch>
+ * @author Tom Rodewald (partial) <Tom.Rodewald@Unibas.ch>
+ *
+ * This function handles almost any action that requires an input.
+ * As soon as an input is accepted, this function is called.
+ *
+ * Note: This function is really long and really badly organised. I assume because almost all previous
+ * contributors had to work with it and there was no documentation.
+ * Readability could be improved a bit by using a switch statement and sub-functions. - Joan
+ */
 function edit_confirmed() {
     closeOverlay()
     console.log("edit confirmed: " + edit_target)
@@ -420,6 +434,8 @@ function load_chat(nm) {
         var c = document.getElementById('core');
         c.scrollTop = c.scrollHeight;
     }, 100);
+
+    // > This code has been commented out by previous contributors. Maybe delete it? - Joan
     /*
     // scroll to bottom:
     var c = document.getElementById('core');
@@ -1064,6 +1080,7 @@ function persist() {
     window.localStorage.setItem("tremola", JSON.stringify(tremola));
 }
 
+// > This code has been commented out by previous contributors. Maybe delete it? - Joan
 /*
 function b2f_local_peer(p, status) { // wireless peer: online, offline, connected, disconnected
     console.log("local peer", p, status);
@@ -1079,7 +1096,7 @@ function b2f_local_peer(p, status) { // wireless peer: online, offline, connecte
 }
 */
 
-
+// > This code has been commented out by previous contributors. Maybe delete it? - Joan
 // type: 'udp' or 'ble'
 // identifier: unique identifier of the peer
 // displayname
@@ -1164,6 +1181,7 @@ function b2f_new_event(e) { // incoming SSB log event: we get map with three ent
             console.log("new post 1 ", ch)
             if (!(e.header.ref in ch.posts)) { // new post
                 var a = e.public;
+                // > This code has been commented out by previous contributors. Maybe delete it? - Joan
                 // var d = new Date(e.header.tst);
                 // d = d.toDateString() + ' ' + d.toTimeString().substring(0,5);
                 // var txt = null;
