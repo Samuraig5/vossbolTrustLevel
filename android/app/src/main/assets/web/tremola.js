@@ -23,10 +23,10 @@ var pubs = []
  * This holds the information used for levels of trust.
  */
 const trustLevels = Object.freeze({
-    Restricted: {trustName: "Restricted", trustScore: 0, tintColour: '#232323'},
-    Stranger: {trustName: "Stranger", trustScore: 1, tintColour: '#f13b3b'},
-    Acquaintance: {trustName: "Acquaintance", trustScore: 2, tintColour: '#d7de30'},
     Friend: {trustName: "Friend", trustScore: 3, tintColour: '#4ebc2e'},
+    Acquaintance: {trustName: "Acquaintance", trustScore: 2, tintColour: '#d7de30'},
+    Stranger: {trustName: "Stranger", trustScore: 1, tintColour: '#f13b3b'},
+    Restricted: {trustName: "Restricted", trustScore: 0, tintColour: '#232323'},
 });
 
 // --- menu callbacks
@@ -460,57 +460,37 @@ function load_chat_list() {
     document.getElementById('lst:chats').innerHTML = '';
     load_chat_item(meOnly)
 
-    let bucketRestricted = []
-    let bucketStranger = []
-    let bucketAcquaintance = []
-    let bucketFriend = []
+    let chatBuckets = {};
 
-    for (var p in tremola.chats) {
-        if (p == meOnly || tremola.chats[p]['forgotten'] || p == 'ALL') {
-            continue
-        }
-        let trust = getTrustLevelOfChat(p)
-        switch (trust[0]) {
-            case 0:
-                bucketRestricted.push(p)
-                break
-            case 1:
-                bucketStranger.push(p)
-                break
-            case 2:
-                bucketAcquaintance.push(p)
-                break
-            case 3:
-                bucketFriend.push(p)
-                break
-        }
+    for (let level in trustLevels) {
+        chatBuckets[trustLevels[level].trustScore] = [];
     }
 
-    bucketRestricted.sort(function (a, b) {
-        return tremola.chats[b]["touched"] - tremola.chats[a]["touched"]
-    })
-    bucketStranger.sort(function (a, b) {
-        return tremola.chats[b]["touched"] - tremola.chats[a]["touched"]
-    })
-    bucketAcquaintance.sort(function (a, b) {
-        return tremola.chats[b]["touched"] - tremola.chats[a]["touched"]
-    })
-    bucketFriend.sort(function (a, b) {
-        return tremola.chats[b]["touched"] - tremola.chats[a]["touched"]
-    })
+    for (let p in tremola.chats) {
+        if (p === meOnly || tremola.chats[p]['forgotten'] || p === 'ALL') {
+            continue;
+        }
+        let trust = getTrustLevelOfChat(p);
+        chatBuckets[trust[0]].push(p);
+    }
 
-    bucketFriend.forEach(function (p) {
-        load_chat_item(p)
-    })
-    bucketAcquaintance.forEach(function (p) {
-        load_chat_item(p)
-    })
-    bucketStranger.forEach(function (p) {
-        load_chat_item(p)
-    })
-    bucketRestricted.forEach(function (p) {
-        load_chat_item(p)
-    })
+    let sortBuckets = (bucket) => {
+        return bucket.sort((a, b) => tremola.chats[b]["touched"] - tremola.chats[a]["touched"]);
+    };
+
+    for (let level in trustLevels) {
+        sortBuckets(chatBuckets[trustLevels[level].trustScore]);
+    }
+
+    let loadChatItems = (chatList) => {
+        chatList.forEach((p) => {
+            load_chat_item(p);
+        });
+    };
+
+    for (let level in trustLevels) {
+        loadChatItems(chatBuckets[trustLevels[level].trustScore]);
+    }
 
     load_chat_item('ALL')
     // Forgotten chats: unsorted
@@ -529,7 +509,6 @@ function getTrustLevelOfChat(nm) {
     let lowestCommonTrustScore = trustLevels.Friend.trustScore
     let tintColour = trustLevels.Friend.tintColour;
     let chatMemberList = tremola.chats[nm].members
-
 
     for(let i = 0; i < chatMemberList.length; i++) {
         let member = chatMemberList[i]
