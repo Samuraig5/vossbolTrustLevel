@@ -459,35 +459,72 @@ function load_chat_list() {
     // console.log('meOnly', meOnly)
     document.getElementById('lst:chats').innerHTML = '';
     load_chat_item(meOnly)
-    var lop = [];
+
+    let bucketRestricted = []
+    let bucketStranger = []
+    let bucketAcquaintance = []
+    let bucketFriend = []
+
     for (var p in tremola.chats) {
-        if (p != meOnly && !tremola.chats[p]['forgotten'])
-            lop.push(p)
+        if (p == meOnly || tremola.chats[p]['forgotten'] || p == 'ALL') {
+            continue
+        }
+        let trust = getTrustLevelOfChat(p)
+        switch (trust[0]) {
+            case 0:
+                bucketRestricted.push(p)
+                break
+            case 1:
+                bucketStranger.push(p)
+                break
+            case 2:
+                bucketAcquaintance.push(p)
+                break
+            case 3:
+                bucketFriend.push(p)
+                break
+        }
     }
-    lop.sort(function (a, b) {
+
+    bucketRestricted.sort(function (a, b) {
         return tremola.chats[b]["touched"] - tremola.chats[a]["touched"]
     })
-    lop.forEach(function (p) {
+    bucketStranger.sort(function (a, b) {
+        return tremola.chats[b]["touched"] - tremola.chats[a]["touched"]
+    })
+    bucketAcquaintance.sort(function (a, b) {
+        return tremola.chats[b]["touched"] - tremola.chats[a]["touched"]
+    })
+    bucketFriend.sort(function (a, b) {
+        return tremola.chats[b]["touched"] - tremola.chats[a]["touched"]
+    })
+
+    bucketFriend.forEach(function (p) {
         load_chat_item(p)
     })
-    // forgotten chats: unsorted
-    if (!tremola.settings.hide_forgotten_conv)
-        for (var p in tremola.chats)
-            if (p != meOnly && tremola.chats[p]['forgotten'])
-                load_chat_item(p)
+    bucketAcquaintance.forEach(function (p) {
+        load_chat_item(p)
+    })
+    bucketStranger.forEach(function (p) {
+        load_chat_item(p)
+    })
+    bucketRestricted.forEach(function (p) {
+        load_chat_item(p)
+    })
+
+    load_chat_item('ALL')
+    // Forgotten chats: unsorted
+    if (!tremola.settings.hide_forgotten_conv) {
+        for (var p in tremola.chats) {
+            if (p != meOnly && tremola.chats[p]['forgotten']) {
+                load_chat_item(p);
+            }
+        }
+    }
+
 }
 
-function load_chat_item(nm) { // appends a button for conversation with name nm to the conv list
-    var cl, mem, item, bg, row, badge, badgeId, cnt;
-    cl = document.getElementById('lst:chats');
-    // console.log(nm)
-    if (nm == "ALL")
-        mem = "ALL";
-    else
-        mem = recps2display(tremola.chats[nm].members);
-    item = document.createElement('div');
-    // item.style = "padding: 0px 5px 10px 5px; margin: 3px 3px 6px 3px;";
-    item.setAttribute('class', 'chat_item_div'); // old JS (SDK 23)
+function getTrustLevelOfChat(nm) {
 
     let lowestCommonTrustScore = trustLevels.Friend.trustScore
     let tintColour = trustLevels.Friend.tintColour;
@@ -506,6 +543,23 @@ function load_chat_item(nm) { // appends a button for conversation with name nm 
             tintColour = contact.levelsOfTrust.tintColour
         }
     }
+    return [lowestCommonTrustScore, tintColour]
+}
+
+function load_chat_item(nm) { // appends a button for conversation with name nm to the conv list
+    var cl, mem, item, bg, row, badge, badgeId, cnt;
+    cl = document.getElementById('lst:chats');
+    // console.log(nm)
+    if (nm == "ALL")
+        mem = "ALL";
+    else
+        mem = recps2display(tremola.chats[nm].members);
+    item = document.createElement('div');
+    // item.style = "padding: 0px 5px 10px 5px; margin: 3px 3px 6px 3px;";
+    item.setAttribute('class', 'chat_item_div'); // old JS (SDK 23)
+
+    let trust = getTrustLevelOfChat(nm)
+    let tintColour = trust[1]
 
     bg = getBackgroundColour(tremola.chats[nm].forgotten, tintColour, '#808080', '#ebf4fa', 0.3)
 
