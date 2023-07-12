@@ -23,10 +23,10 @@ var pubs = []
  * This holds the information used for levels of trust.
  */
 const trustLevels = Object.freeze({
-    Restricted: {trustName: "Restricted", trustScore: 3, tintColour: '#232323'},
-    Stranger: {trustName: "Stranger", trustScore: 2, tintColour: '#f13b3b'},
-    Acquaintance: {trustName: "Acquaintance", trustScore: 1, tintColour: '#d7de30'},
-    Friend: {trustName: "Friend", trustScore: 0, tintColour: '#4ebc2e'},
+    Restricted: {trustName: "Restricted", trustScore: 0, tintColour: '#232323'},
+    Stranger: {trustName: "Stranger", trustScore: 1, tintColour: '#f13b3b'},
+    Acquaintance: {trustName: "Acquaintance", trustScore: 2, tintColour: '#d7de30'},
+    Friend: {trustName: "Friend", trustScore: 3, tintColour: '#4ebc2e'},
 });
 
 // --- menu callbacks
@@ -472,8 +472,28 @@ function load_chat_item(nm) { // appends a button for conversation with name nm 
     item = document.createElement('div');
     // item.style = "padding: 0px 5px 10px 5px; margin: 3px 3px 6px 3px;";
     item.setAttribute('class', 'chat_item_div'); // old JS (SDK 23)
-    if (tremola.chats[nm].forgotten) bg = ' gray'; else bg = ' light';
-    row = "<button class='chat_item_button w100" + bg + "' onclick='load_chat(\"" + nm + "\");' style='overflow: hidden; position: relative;'>";
+
+    let lowestCommonTrustScore = trustLevels.Friend.trustScore
+    let tintColour = trustLevels.Friend.tintColour;
+    let chatMemberList = tremola.chats[nm].members
+
+
+    for(let i = 0; i < chatMemberList.length; i++) {
+        let member = chatMemberList[i]
+        if(member == 'ALL') {
+            tintColour = trustLevels.Stranger.tintColour
+            continue;
+        }
+        let contact = tremola.contacts[member]
+        if(contact.levelsOfTrust.trustScore < lowestCommonTrustScore) {
+            lowestCommonTrustScore = contact.levelsOfTrust.trustScore
+            tintColour = contact.levelsOfTrust.tintColour
+        }
+    }
+
+    bg = getBackgroundColour(tremola.chats[nm].forgotten, tintColour, '#808080', '#ebf4fa', 0.3)
+
+    row = "<button class='chat_item_button w100 light' onclick='load_chat(\"" + nm + "\");' style='overflow: hidden; background-color: " + bg + "; position: relative;'>";
     row += "<div style='white-space: nowrap;'><div style='text-overflow: ellipsis; overflow: hidden;'>" + tremola.chats[nm].alias + "</div>";
     row += "<div style='text-overflow: clip; overflow: 'ellipsis';'><font size=-2>" + escapeHTML(mem) + "</font></div></div>";
     badgeId = nm + "-badge"
@@ -508,7 +528,7 @@ function getSortedContacts () {
 
     for(var j = 0; j < contactArray.length; j++) {
         for(var i = j + 1; i < contactArray.length; i++) {
-            if(contactArray[i].levelsOfTrust.trustScore < contactArray[j].levelsOfTrust.trustScore) {
+            if(contactArray[i].levelsOfTrust.trustScore > contactArray[j].levelsOfTrust.trustScore) {
                 var tempContact = contactArray[j];
                 contactArray[j] = contactArray[i];
                 contactArray[i] = tempContact;
@@ -639,6 +659,14 @@ function rgbToHex(r, g, b) {
     return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, "0")}`;
 }
 
+function getBackgroundColour (isObjectForgotten, tintColour, forgottenColour, defaultColour, lerpWeight) {
+    // console.log("load_c_i", JSON.stringify(c[1]))
+    let bg = isObjectForgotten ? forgottenColour : defaultColour;
+    //This will lerp the background of the contact with the associated with the colour of the contacts trust level.
+    bg = lerpColor(bg, tintColour, lerpWeight)
+    return bg;
+}
+
 /**
  * @author (Original Author Unknown)
  * @author Joan Moser (partial) <Gian.Moser@Unibas.ch>
@@ -667,12 +695,7 @@ function load_contact_item(c) {
         c[1]["levelsOfTrust"] = trustLevels.Stranger
         persist();
     }
-
-
-    // console.log("load_c_i", JSON.stringify(c[1]))
-    bg = c[1].forgotten ? '#800000' : '#fdfdfd';
-    //This will lerp the background of the contact with the associated with the colour of the contacts trust level.
-    bg = lerpColor(bg, c[1].levelsOfTrust.tintColour, 0.3)
+    bg = getBackgroundColour(c[1].forgotten, c[1].levelsOfTrust.tintColour, '#808080', '#ebf4fa', 0.3)
     // Create the 'Icon' Circle
     row = "<button class=contact_picture style='margin-right: 0.75em; background: " + c[1].color + ";'>" + c[1].initial + " " + c[1].levelsOfTrust.trustScore + "</button>";
     // Create the Contact Bar
@@ -743,12 +766,12 @@ function show_contact_details(id) {
     // Replace checkbox with select dropdown
     details += '<br>' +
         '<div class=settings style="padding: 0px;">' +
-            '<div class=settingsText>Change trust level</div>' +
-            '<div style="float: right;">' +
-                '<select id="change_trust_level" onchange="change_contact_trustLevel(this);">' +
-                    trustOptions +
-                '</select>' +
-            '</div>' +
+        '<div class=settingsText>Change trust level</div>' +
+        '<div style="float: right;">' +
+        '<select id="change_trust_level" onchange="change_contact_trustLevel(this);">' +
+        trustOptions +
+        '</select>' +
+        '</div>' +
         '</div>';
 
     details += '<br><div class=settings style="padding: 0px;"><div class=settingsText>Forget this contact</div><div style="float: right;"><label class="switch"><input id="hide_contact" type="checkbox" onchange="toggle_forget_contact(this);"><span class="slider round"></span></label></div></div>'
@@ -786,6 +809,7 @@ function change_contact_trustLevel(e) {
         persist();
         closeOverlay();
         load_contact_list();
+        load_chat_list();
     }
 }
 
