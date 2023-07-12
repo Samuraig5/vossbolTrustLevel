@@ -546,6 +546,17 @@ function getTrustLevelOfChat(nm) {
     return [lowestCommonTrustScore, tintColour]
 }
 
+/**
+ * @author (Original Author Unknown)
+ * @author Joan Moser (partial) <Gian.Moser@Unibas.ch>
+ * @author Tom Rodewald (partial) <Tom.Rodewald@Unibas.ch>
+ *
+ * This function loads the 'button' that display a chat in the chat list.
+ * It will colour the chat based on the lowest trust level found in its members.
+ * The public chat is always marked with the trust level "stranger"
+ *
+ * @param nm Name of the Chat to be displayed
+ */
 function load_chat_item(nm) { // appends a button for conversation with name nm to the conv list
     var cl, mem, item, bg, row, badge, badgeId, cnt;
     cl = document.getElementById('lst:chats');
@@ -729,6 +740,19 @@ function rgbToHex(r, g, b) {
     return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, "0")}`;
 }
 
+/**
+ * @author Joan Moser <Gian.Moser@Unibas.ch>
+ * @author Tom Rodewald <Tom.Rodewald@Unibas.ch>
+ *
+ * This function is used to generate the interpolated colour of an object, depending on if the object has been forgotten or not.
+ *
+ * @param isObjectForgotten Bool if the object has been forgotten
+ * @param tintColour Colour the object should be tinted in
+ * @param forgottenColour Base colour if the object has been forgotten
+ * @param defaultColour Base colour if the object is not forgotten
+ * @param lerpWeight Weight of the lerp [0,1]. Lower weights favour Base Colour, higher weights favour Tint Colour
+ * @return Interpolated Colour
+ */
 function getBackgroundColour (isObjectForgotten, tintColour, forgottenColour, defaultColour, lerpWeight) {
     // console.log("load_c_i", JSON.stringify(c[1]))
     let bg = isObjectForgotten ? forgottenColour : defaultColour;
