@@ -24,9 +24,9 @@ var pubs = []
  */
 const trustLevels = Object.freeze({
     Restricted: {trustName: "Restricted", trustScore: 3, tintColour: '#232323'},
-    Strangers: {trustName: "Stranger", trustScore: 2, tintColour: '#f13b3b'},
+    Stranger: {trustName: "Stranger", trustScore: 2, tintColour: '#f13b3b'},
     Acquaintance: {trustName: "Acquaintance", trustScore: 1, tintColour: '#d7de30'},
-    Friends: {trustName: "Friend", trustScore: 0, tintColour: '#4ebc2e'},
+    Friend: {trustName: "Friend", trustScore: 0, tintColour: '#4ebc2e'},
 });
 
 // --- menu callbacks
@@ -142,11 +142,19 @@ function edit_confirmed() {
         document.getElementById('contact_id').value = '';
         if (val == '')
             val = id2b32(new_contact_id);
+
+        let trustLevel = trustLevels.Stranger
+
+        if(edit_target == 'new_contact_alias') {
+            trustLevel = trustLevels.Acquaintance
+        } else if (edit_target == 'trust_wifi_peer') {
+            trustLevel = trustLevels.Stranger
+        }
         tremola.contacts[new_contact_id] = {
             "alias": val,
             "initial": val.substring(0, 1).toUpperCase(),
             "color": colors[Math.floor(colors.length * Math.random())],
-            "levelsOfTrust": trustLevels.Strangers
+            "levelsOfTrust": trustLevel
         };
         var recps = [myId, new_contact_id];
         var nm = recps2nm(recps);
@@ -655,7 +663,7 @@ function load_contact_item(c) {
     }
 
     if (!("levelsOfTrust" in c[1])) {
-        c[1]["levelsOfTrust"] = trustLevels.Strangers
+        c[1]["levelsOfTrust"] = trustLevels.Stranger
         persist();
     }
 
@@ -712,7 +720,13 @@ function show_contact_details(id) {
 
     // Generate dropdown options dynamically from trustLevels enum
     var trustOptions = '';
+    var curTrustLevel = tremola.contacts[new_contact_id].levelsOfTrust.trustName
+    trustOptions += '<option value="' + curTrustLevel + '">' + curTrustLevel + '</option>';
     for (var trustLevel in trustLevels) {
+        console.log(trustLevel + " " + curTrustLevel)
+        if(trustLevel === curTrustLevel) {
+            continue
+        }
         trustOptions += '<option value="' + trustLevel + '">' + trustLevels[trustLevel].trustName + '</option>';
     }
 
@@ -1019,7 +1033,7 @@ function resetTremola() { // wipes browser-side content
         "alias": "me",
         "initial": "M",
         "color": "#bd7578",
-        "levelsOfTrust": trustLevels.Friends,
+        "levelsOfTrust": trustLevels.Friend,
         "forgotten": false
     };
     createBoard('Personal Board', [FLAG.PERSONAL])
