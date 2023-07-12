@@ -477,6 +477,17 @@ function load_chat_list() {
                 load_chat_item(p)
 }
 
+/**
+ * @author (Original Author Unknown)
+ * @author Joan Moser (partial) <Gian.Moser@Unibas.ch>
+ * @author Tom Rodewald (partial) <Tom.Rodewald@Unibas.ch>
+ *
+ * This function loads the 'button' that display a chat in the chat list.
+ * It will colour the chat based on the lowest trust level found in its members.
+ * The public chat is always marked with the trust level "stranger"
+ *
+ * @param nm Name of the Chat to be displayed
+ */
 function load_chat_item(nm) { // appends a button for conversation with name nm to the conv list
     var cl, mem, item, bg, row, badge, badgeId, cnt;
     cl = document.getElementById('lst:chats');
@@ -492,7 +503,6 @@ function load_chat_item(nm) { // appends a button for conversation with name nm 
     let lowestCommonTrustScore = trustLevels.Friend.trustScore
     let tintColour = trustLevels.Friend.tintColour;
     let chatMemberList = tremola.chats[nm].members
-
 
     for(let i = 0; i < chatMemberList.length; i++) {
         let member = chatMemberList[i]
@@ -675,8 +685,20 @@ function rgbToHex(r, g, b) {
     return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, "0")}`;
 }
 
+/**
+ * @author Joan Moser <Gian.Moser@Unibas.ch>
+ * @author Tom Rodewald <Tom.Rodewald@Unibas.ch>
+ *
+ * This function is used to generate the interpolated colour of an object, depending on if the object has been forgotten or not.
+ *
+ * @param isObjectForgotten Bool if the object has been forgotten
+ * @param tintColour Colour the object should be tinted in
+ * @param forgottenColour Base colour if the object has been forgotten
+ * @param defaultColour Base colour if the object is not forgotten
+ * @param lerpWeight Weight of the lerp [0,1]. Lower weights favour Base Colour, higher weights favour Tint Colour
+ * @return Interpolated Colour
+ */
 function getBackgroundColour (isObjectForgotten, tintColour, forgottenColour, defaultColour, lerpWeight) {
-    // console.log("load_c_i", JSON.stringify(c[1]))
     let bg = isObjectForgotten ? forgottenColour : defaultColour;
     //This will lerp the background of the contact with the associated with the colour of the contacts trust level.
     bg = lerpColor(bg, tintColour, lerpWeight)
@@ -991,9 +1013,10 @@ function recps2nm(rcps) { // use concat of sorted FIDs as internal name for conv
 
 function recps2display(rcps) {
     if (rcps == null) return 'ALL';
-    var lst = rcps.map(function (fid) {
-        return fid2display(fid)
-    });
+    var lst = rcps.map( // Map each fid in rcps to its alias (or first 9 digits if fid is not in contacts)
+        function (fid) {
+            return fid2display(fid)
+        });
     return '[' + lst.join(', ') + ']';
 }
 
