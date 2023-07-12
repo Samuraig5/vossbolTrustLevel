@@ -145,6 +145,7 @@ function edit_confirmed() {
 
         let trustLevel = trustLevels.Stranger
 
+        // adjust levelOfTrust depending on how they got to be your contact
         if(edit_target == 'new_contact_alias') {
             trustLevel = trustLevels.Acquaintance
         } else if (edit_target == 'trust_wifi_peer') {
