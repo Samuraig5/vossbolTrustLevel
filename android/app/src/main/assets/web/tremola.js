@@ -770,7 +770,7 @@ function load_contact_item(c) {
     }
     bg = getBackgroundColour(c[1].forgotten, c[1].levelsOfTrust.tintColour, '#808080', '#ebf4fa', 0.3)
     // Create the 'Icon' Circle
-    row = "<button class=contact_picture style='margin-right: 0.75em; background: " + c[1].color + ";'>" + c[1].initial + " " + c[1].levelsOfTrust.trustScore + "</button>";
+    row = "<button class=contact_picture style='margin-right: 0.75em; background: " + c[1].color + ";'>" + c[1].initial + "</button>";
     // Create the Contact Bar
     row += "<button class='chat_item_button' style='overflow: hidden; width: calc(100% - 4em); background-color: " + bg + ";' onclick='show_contact_details(\"" + c[0] + "\");'>";
     // Display the Alias of the Contact
