@@ -1385,13 +1385,19 @@ function b2f_new_event(e) { // incoming SSB log event: we get map with three ent
                 // var txt = null;
                 // if (a[1] != null)
                 //   txt = a[1];
+                let shouldDisplay = false
+                // if the user does not have a trust-Score, add a default "Stranger" trust-Score to the user
+                if(tremola.contacts[e.header.fid] != null && tremola.contacts[e.header.fid].levelsOfTrust == null) {
+                    tremola.contacts[e.header.fid].levelsOfTrust = trustLevels.Stranger;
+                }
+
                 var p = {
                     "key": e.header.ref,
                     "from": e.header.fid,
                     "body": a[1],
                     "voice": a[2],
                     "when": a[3] * 1000, //why is there a factor of 1000 here?
-                    "Display": tremola.contacts[e.header.fid].levelsOfTrust.trustScore == 0 ? false : true
+                    "Display": shouldDisplay
                 };
                 console.log("new post 2 ", p)
                 console.log("time: ", a[3])
