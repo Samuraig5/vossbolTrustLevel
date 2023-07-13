@@ -381,6 +381,7 @@ function load_post_item(p) { // { 'key', 'from', 'when', 'body', 'to', 'Display'
     // console.log("box=", box);
     if (is_other) {
         box += "<font size=-1><i>" + fid2display(p["from"]) + "</i></font><br>";
+        // can be improved
         if (c.levelsOfTrust.trustScore == 3) {
             textColour = "color: black"
         } else if (c.levelsOfTrust.trustScore == 2) {
@@ -429,20 +430,46 @@ function load_post_item(p) { // { 'key', 'from', 'when', 'body', 'to', 'Display'
     }
     pl.insertRow(pl.rows.length).innerHTML = row;
 }
-
+/**
+ * @author Joan Moser <Gian.Moser@Unibas.ch>
+ * @author Tom Rodewald <Tom.Rodewald@Unibas.ch>
+ *
+ * @param e the created event and its details
+ * @param p the key of the message for which the display flag has to be inverted
+ *
+ * This function inverts the boolean value called Display for a given chat
+ */
 function toggleDisplay(e, p) {
     let post = tremola.chats[curr_chat].posts[p]
-    post.Display = true
+    post.Display = !post.Display
     persist()
     load_chat(curr_chat) // wasteful, should only update the one chat item and not the entire chat list
 }
 
+/**
+ * @author Joan Moser <Gian.Moser@Unibas.ch>
+ * @author Tom Rodewald <Tom.Rodewald@Unibas.ch>
+ *
+ * @param nm chatID of the currently opened chat to access it from the JSON database "tremola"
+ *
+ * @return random fid of a single user that is in the Chat
+ * This function is used for debugging purposes
+ */
 function getRandomUserOfChat(nm) {
     var participants = tremola.chats[nm].members;
     var index = Math.floor(Math.random() * participants.length)
     return participants[index]
 }
 
+/**
+ * @author Joan Moser <Gian.Moser@Unibas.ch>
+ * @author Tom Rodewald <Tom.Rodewald@Unibas.ch>
+ *
+ * @param n length of the string
+ *
+ * @return random string with a given length n.
+ * This function is used for debugging purposes
+ */
 function generateRandomString(n) {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let randomString = '';
@@ -455,6 +482,17 @@ function generateRandomString(n) {
     return randomString;
 }
 
+/**
+ * @author Joan Moser <Gian.Moser@Unibas.ch>
+ * @author Tom Rodewald <Tom.Rodewald@Unibas.ch>
+ *
+ * @param nm chatID of the currently opened chat to access it from the JSON database "tremola"
+ *
+ * This function appends a random message to an existing chat.
+ * This function only uses userIDs from users that are in the chat.
+ * If the user that is being chosen is restricted the Display flag will be set to False, otherwise it will be True.
+ * This function is used for debugging purposes
+ */
 function appendRandomMessageInChat(nm) {
     let ch = tremola.chats[nm]
     let headerRef = Math.floor(1000000 * Math.random());
@@ -465,7 +503,7 @@ function appendRandomMessageInChat(nm) {
         "from": user,
         "body": generateRandomString(Math.random() * 50),
         "when": Date.now(),
-        "Display": tremola.contacts[user].levelsOfTrust.trustScore <= 1 ? false : true
+        "Display": tremola.contacts[user].levelsOfTrust.trustScore == 0 ? false : true
     };
     ch["posts"][headerRef] = p;
 }
@@ -1352,7 +1390,8 @@ function b2f_new_event(e) { // incoming SSB log event: we get map with three ent
                     "from": e.header.fid,
                     "body": a[1],
                     "voice": a[2],
-                    "when": a[3] * 1000 //why is there a factor of 1000 here?
+                    "when": a[3] * 1000, //why is there a factor of 1000 here?
+                    "Display": tremola.contacts[e.header.fid].levelsOfTrust.trustScore == 0 ? false : true
                 };
                 console.log("new post 2 ", p)
                 console.log("time: ", a[3])
