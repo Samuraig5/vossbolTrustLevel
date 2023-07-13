@@ -1079,7 +1079,7 @@ function backend(cmdStr) { // send this to Kotlin (or simulate in case of browse
         resetTremola()
         location.reload()
     } else if (cmdStr[0] == 'priv:post') {
-        var draft = atob(cmdStr[1])
+        var draft = atob(cmdStr[2])
         cmdStr.splice(0, 2)
         var e = {
             'header': {
