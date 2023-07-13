@@ -381,8 +381,16 @@ function load_post_item(p) { // { 'key', 'from', 'when', 'body', 'to', 'Display'
     // console.log("box=", box);
     if (is_other) {
         box += "<font size=-1><i>" + fid2display(p["from"]) + "</i></font><br>";
-        if(c.levelsOfTrust.trustScore <= 2) {
-            textColour = "color: gray";
+        if (c.levelsOfTrust.trustScore == 3) {
+            textColour = "color: black"
+        } else if (c.levelsOfTrust.trustScore == 2) {
+            textColour = "color: lightgray"
+        } else if (c.levelsOfTrust.trustScore == 1) {
+            textColour = "color: gray"
+        } else if (c.levelsOfTrust.trustScore == 0) {
+            textColour = "color: darkgray"
+        } else {
+            textColour = "color: black"
         }
     }
     var txt = ""
@@ -391,21 +399,20 @@ function load_post_item(p) { // { 'key', 'from', 'when', 'body', 'to', 'Display'
             p.Display = true
             persist()
         }
-        // if (p.Display == false) {
-        //     txt = "-"
-        // } else {
+        if (p.Display == false) {
+            txt = "<button style='padding: 2px 5px;' onclick='toggleDisplay(this, \"" + p.key + "\");'>Show</button>";
+        } else {
             txt = escapeHTML(p["body"]).replace(/\n/g, "<br>\n");
             var re = /!\[.*?\]\((.*?)\)/g;
             txt = txt.replace(re, " &nbsp;<object type='image/jpeg' style='width: 95%; display: block; margin-left: auto; margin-right: auto; cursor: zoom-in;' data='http://appassets.androidplatform.net/blobs/$1' ondblclick='modal_img(this)'></object>&nbsp; ");
             // txt = txt + " &nbsp;<object type='image/jpeg' width=95% data='http://appassets.androidplatform.net/blobs/25d444486ffb848ed0d4f1d15d9a165934a02403b66310bf5a56757fec170cd2.jpg'></object>&nbsp; (!)";
             // console.log(txt);
-        // }
+        }
     }
     if (p.voice != null)
         box += "<span style='color: red;'>&#x1f50a;</span>&nbsp;&nbsp;"
 
     txt = "<span style='" + textColour + "'>" + txt + "</span>";
-
     box += txt
     var d = new Date(p["when"]);
     d = d.toDateString() + ' ' + d.toTimeString().substring(0, 5);
@@ -421,6 +428,13 @@ function load_post_item(p) { // { 'key', 'from', 'when', 'body', 'to', 'Display'
         row += "<td style='vertical-align: top; color: var(--red); font-weight: 900;'>&lt;"
     }
     pl.insertRow(pl.rows.length).innerHTML = row;
+}
+
+function toggleDisplay(e, p) {
+    let post = tremola.chats[curr_chat].posts[p]
+    post.Display = true
+    persist()
+    load_chat(curr_chat) // wasteful, should only update the one chat item and not the entire chat list
 }
 
 function getRandomUserOfChat(nm) {
