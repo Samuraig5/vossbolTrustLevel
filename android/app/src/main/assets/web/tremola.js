@@ -366,26 +366,46 @@ function new_image_post() {
     }, 100);
 }
 
-function load_post_item(p) { // { 'key', 'from', 'when', 'body', 'to' (if group or public)>
+function load_post_item(p) { // { 'key', 'from', 'when', 'body', 'to', 'Display' (if group or public)>
     var pl = document.getElementById('lst:posts');
     var is_other = p["from"] != myId;
+    var c = tremola.contacts[p.from]
     var box = "<div class=light style='padding: 3pt; border-radius: 4px; box-shadow: 0 0 5px rgba(0,0,0,0.7);'"
     if (p.voice != null)
         box += " onclick='play_voice(\"" + curr_chat + "\", \"" + p.key + "\");'";
+
     box += ">"
+
+    var textColour = "color: black";
+
     // console.log("box=", box);
-    if (is_other)
+    if (is_other) {
         box += "<font size=-1><i>" + fid2display(p["from"]) + "</i></font><br>";
+        if(c.levelsOfTrust.trustScore <= 2) {
+            textColour = "color: gray";
+        }
+    }
     var txt = ""
     if (p["body"] != null) {
-        txt = escapeHTML(p["body"]).replace(/\n/g, "<br>\n");
-        var re = /!\[.*?\]\((.*?)\)/g;
-        txt = txt.replace(re, " &nbsp;<object type='image/jpeg' style='width: 95%; display: block; margin-left: auto; margin-right: auto; cursor: zoom-in;' data='http://appassets.androidplatform.net/blobs/$1' ondblclick='modal_img(this)'></object>&nbsp; ");
-        // txt = txt + " &nbsp;<object type='image/jpeg' width=95% data='http://appassets.androidplatform.net/blobs/25d444486ffb848ed0d4f1d15d9a165934a02403b66310bf5a56757fec170cd2.jpg'></object>&nbsp; (!)";
-        // console.log(txt);
+        if (p.Display == null) {
+            p.Display = true
+            persist()
+        }
+        // if (p.Display == false) {
+        //     txt = "-"
+        // } else {
+            txt = escapeHTML(p["body"]).replace(/\n/g, "<br>\n");
+            var re = /!\[.*?\]\((.*?)\)/g;
+            txt = txt.replace(re, " &nbsp;<object type='image/jpeg' style='width: 95%; display: block; margin-left: auto; margin-right: auto; cursor: zoom-in;' data='http://appassets.androidplatform.net/blobs/$1' ondblclick='modal_img(this)'></object>&nbsp; ");
+            // txt = txt + " &nbsp;<object type='image/jpeg' width=95% data='http://appassets.androidplatform.net/blobs/25d444486ffb848ed0d4f1d15d9a165934a02403b66310bf5a56757fec170cd2.jpg'></object>&nbsp; (!)";
+            // console.log(txt);
+        // }
     }
     if (p.voice != null)
         box += "<span style='color: red;'>&#x1f50a;</span>&nbsp;&nbsp;"
+
+    txt = "<span style='" + textColour + "'>" + txt + "</span>";
+
     box += txt
     var d = new Date(p["when"]);
     d = d.toDateString() + ' ' + d.toTimeString().substring(0, 5);
@@ -393,7 +413,6 @@ function load_post_item(p) { // { 'key', 'from', 'when', 'body', 'to' (if group 
     box += d + "</i></div></div>";
     var row;
     if (is_other) {
-        var c = tremola.contacts[p.from]
         row = "<td style='vertical-align: top;'><button class=contact_picture style='margin-right: 0.5em; margin-left: 0.25em; background: " + c.color + "; width: 2em; height: 2em;'>" + c.initial + "</button>"
         // row  = "<td style='vertical-align: top; color: var(--red); font-weight: 900;'>&gt;"
         row += "<td colspan=2 style='padding-bottom: 10px;'>" + box + "<td colspan=2>";
@@ -425,11 +444,14 @@ function generateRandomString(n) {
 function appendRandomMessageInChat(nm) {
     let ch = tremola.chats[nm]
     let headerRef = Math.floor(1000000 * Math.random());
+    let user = getRandomUserOfChat(nm)
+    console.log(tremola.contacts[user].levelsOfTrust.trustScore)
     var p = {
         "key": headerRef,
-        "from": getRandomUserOfChat(nm),
+        "from": user,
         "body": generateRandomString(Math.random() * 50),
-        "when": Date.now()
+        "when": Date.now(),
+        "Display": tremola.contacts[user].levelsOfTrust.trustScore <= 1 ? false : true
     };
     ch["posts"][headerRef] = p;
 }
@@ -439,8 +461,9 @@ function load_chat(nm) {
     ch = tremola.chats[nm]
     if (ch.members != 'ALL') {
         let amount = Math.random() * 10 + 1;
-        for (let i = 0; i < amount; i++)
-            appendRandomMessageInChat(nm)
+        for (let i = 0; i < amount; i++) {
+            // appendRandomMessageInChat(nm)
+        }
     }
 
     if (ch.timeline == null)
