@@ -391,11 +391,11 @@ function load_post_item(p) { // { 'key', 'from', 'when', 'body', 'to', 'Display'
         if (c.levelsOfTrust.trustScore == 3) {
             textColour = "color: black"
         } else if (c.levelsOfTrust.trustScore == 2) {
-            textColour = "color: lightgray"
+            textColour = "color: darkgray"
         } else if (c.levelsOfTrust.trustScore == 1) {
             textColour = "color: gray"
         } else if (c.levelsOfTrust.trustScore == 0) {
-            textColour = "color: darkgray"
+            textColour = "color: lightgray"
         } else {
             textColour = "color: black"
         }
