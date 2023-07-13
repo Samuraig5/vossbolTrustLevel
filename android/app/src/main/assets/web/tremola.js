@@ -162,7 +162,7 @@ function edit_confirmed() {
 
         // adjust levelOfTrust depending on how they got to be your contact
         if (edit_target == 'new_contact_alias') {
-            if(createdContactViaQR == true) {
+            if (createdContactViaQR == true) {
                 trustLevel = trustLevels.Friend
             } else {
                 trustLevel = trustLevels.Acquaintance
@@ -436,6 +436,7 @@ function load_post_item(p) { // { 'key', 'from', 'when', 'body', 'to', 'Display'
     }
     pl.insertRow(pl.rows.length).innerHTML = row;
 }
+
 /**
  * @author Joan Moser <Gian.Moser@Unibas.ch>
  * @author Tom Rodewald <Tom.Rodewald@Unibas.ch>
@@ -612,14 +613,16 @@ function load_chat_list() {
     // Forgotten chats: unsorted
     if (!tremola.settings.hide_forgotten_conv) {
         for (var p in tremola.chats) {
+            if (p === 'ALL') {
+                continue
+            }
             if (p != meOnly && tremola.chats[p]['forgotten']) {
                 load_chat_item(p);
             }
         }
     }
-    if(!tremola.chats['ALL']['forgotten']) {
-        load_chat_item('ALL')
-    }
+    load_chat_item('ALL')
+
 }
 
 function getTrustLevelOfChat(nm) {
@@ -1395,7 +1398,7 @@ function b2f_new_event(e) { // incoming SSB log event: we get map with three ent
 
                 let shouldDisplay = false
                 // if the user does not have a trust-Score, add a default "Stranger" trust-Score to the user
-                if(tremola.contacts[e.header.fid] != null && tremola.contacts[e.header.fid].levelsOfTrust == null) {
+                if (tremola.contacts[e.header.fid] != null && tremola.contacts[e.header.fid].levelsOfTrust == null) {
                     tremola.contacts[e.header.fid].levelsOfTrust = trustLevels.Stranger;
                 }
                 var p = {
