@@ -160,7 +160,7 @@ function edit_confirmed() {
         let trustLevel = trustLevels.Stranger
 
         // adjust levelOfTrust depending on how they got to be your contact
-        if(edit_target == 'new_contact_alias') {
+        if (edit_target == 'new_contact_alias') {
             trustLevel = trustLevels.Acquaintance
         } else if (edit_target == 'trust_wifi_peer') {
             trustLevel = trustLevels.Stranger
@@ -404,9 +404,45 @@ function load_post_item(p) { // { 'key', 'from', 'when', 'body', 'to' (if group 
     pl.insertRow(pl.rows.length).innerHTML = row;
 }
 
+function getRandomUserOfChat(nm) {
+    var participants = tremola.chats[nm].members;
+    var index = Math.floor(Math.random() * participants.length)
+    return participants[index]
+}
+
+function generateRandomString(n) {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let randomString = '';
+
+    for (let i = 0; i < n; i++) {
+        const randomIndex = Math.floor(Math.random() * characters.length);
+        randomString += characters.charAt(randomIndex);
+    }
+
+    return randomString;
+}
+
+function appendRandomMessageInChat(nm) {
+    let ch = tremola.chats[nm]
+    let headerRef = Math.floor(1000000 * Math.random());
+    var p = {
+        "key": headerRef,
+        "from": getRandomUserOfChat(nm),
+        "body": generateRandomString(Math.random() * 50),
+        "when": Date.now()
+    };
+    ch["posts"][headerRef] = p;
+}
+
 function load_chat(nm) {
     var ch, pl, e;
     ch = tremola.chats[nm]
+    if (ch.members != 'ALL') {
+        let amount = Math.random() * 10 + 1;
+        for (let i = 0; i < amount; i++)
+            appendRandomMessageInChat(nm)
+    }
+
     if (ch.timeline == null)
         ch["timeline"] = new Timeline();
     pl = document.getElementById("lst:posts");
@@ -510,14 +546,14 @@ function getTrustLevelOfChat(nm) {
     let tintColour = trustLevels.Friend.tintColour;
     let chatMemberList = tremola.chats[nm].members
 
-    for(let i = 0; i < chatMemberList.length; i++) {
+    for (let i = 0; i < chatMemberList.length; i++) {
         let member = chatMemberList[i]
-        if(member == 'ALL') {
+        if (member == 'ALL') {
             tintColour = trustLevels.Stranger.tintColour
             continue;
         }
         let contact = tremola.contacts[member]
-        if(contact.levelsOfTrust.trustScore < lowestCommonTrustScore) {
+        if (contact.levelsOfTrust.trustScore < lowestCommonTrustScore) {
             lowestCommonTrustScore = contact.levelsOfTrust.trustScore
             tintColour = contact.levelsOfTrust.tintColour
         }
@@ -574,7 +610,7 @@ function load_chat_item(nm) { // appends a button for conversation with name nm 
  *
  * @return sorted tupel of arrays with the format: [contactArray, contactIdArray]
  */
-function getSortedContacts () {
+function getSortedContacts() {
 
     var contactArray = [];
     var contactIdArray = [];
@@ -586,9 +622,9 @@ function getSortedContacts () {
         iterator++;
     }
 
-    for(var j = 0; j < contactArray.length; j++) {
-        for(var i = j + 1; i < contactArray.length; i++) {
-            if(contactArray[i].levelsOfTrust.trustScore > contactArray[j].levelsOfTrust.trustScore) {
+    for (var j = 0; j < contactArray.length; j++) {
+        for (var i = j + 1; i < contactArray.length; i++) {
+            if (contactArray[i].levelsOfTrust.trustScore > contactArray[j].levelsOfTrust.trustScore) {
                 var tempContact = contactArray[j];
                 contactArray[j] = contactArray[i];
                 contactArray[i] = tempContact;
@@ -619,9 +655,9 @@ function load_contact_list() {
     var contactArray = sorted[0] // Array of Contacts
     var contactIdArray = sorted[1] // Array of IDs (associated with contacts)
 
-    for(let j = 0; j < contactArray.length; j++) {
+    for (let j = 0; j < contactArray.length; j++) {
         // If we hide forgotten contacts and the contact is forgotten, skip to the next contact
-        if(tremola.settings.hide_forgotten_contacts && contactArray[j].forgotten) {
+        if (tremola.settings.hide_forgotten_contacts && contactArray[j].forgotten) {
             continue
         }
         load_contact_item([contactIdArray[j], contactArray[j]])
@@ -648,8 +684,11 @@ function load_contact_list() {
  * @return Interpolated Hex Colour
  */
 function lerpColor(color1, color2, t) {
-    if (t < 0) {t = 0;}
-    else if (t > 1) {t = 1;}
+    if (t < 0) {
+        t = 0;
+    } else if (t > 1) {
+        t = 1;
+    }
 
     // Convert Hex color to RGB values
     const rgb1 = hexToRgb(color1);
@@ -683,8 +722,11 @@ function lerpColor(color1, color2, t) {
  * @return Interpolated Float
  */
 function lerp(a, b, t) {
-    if (t < 0) {t = 0;}
-    else if (t > 1) {t = 1;}
+    if (t < 0) {
+        t = 0;
+    } else if (t > 1) {
+        t = 1;
+    }
 
     return (1 - t) * a + t * b;
 }
@@ -732,7 +774,7 @@ function rgbToHex(r, g, b) {
  * @param lerpWeight Weight of the lerp [0,1]. Lower weights favour Base Colour, higher weights favour Tint Colour
  * @return Interpolated Colour
  */
-function getBackgroundColour (isObjectForgotten, tintColour, forgottenColour, defaultColour, lerpWeight) {
+function getBackgroundColour(isObjectForgotten, tintColour, forgottenColour, defaultColour, lerpWeight) {
     // console.log("load_c_i", JSON.stringify(c[1]))
     let bg = isObjectForgotten ? forgottenColour : defaultColour;
     //This will lerp the background of the contact with the associated with the colour of the contacts trust level.
@@ -830,7 +872,7 @@ function show_contact_details(id) {
     trustOptions += '<option value="' + curTrustLevel + '">' + curTrustLevel + '</option>';
     for (var trustLevel in trustLevels) {
         console.log(trustLevel + " " + curTrustLevel)
-        if(trustLevel === curTrustLevel) {
+        if (trustLevel === curTrustLevel) {
             continue
         }
         trustOptions += '<option value="' + trustLevel + '">' + trustLevels[trustLevel].trustName + '</option>';
@@ -1190,8 +1232,8 @@ function b2f_ble_enabled() {
 
 function b2f_ble_disabled() {
 
-    for(var p in localPeers) {
-        if(localPeers[p].type == "ble") {
+    for (var p in localPeers) {
+        if (localPeers[p].type == "ble") {
             delete localPeers[p]
             refresh_connection_entry(p)
         }
@@ -1204,13 +1246,13 @@ function b2f_local_peer_remaining_updates(identifier, remaining) {
 }
 
 function b2f_local_peer(type, identifier, displayname, status) {
-    console.log( "incoming displayname:", displayname)
+    console.log("incoming displayname:", displayname)
     if (displayname == "null") {
         displayname = identifier
     }
 
     localPeers[identifier] = {
-        'type' : type,
+        'type': type,
         'name': displayname,
         'status': status,
         'remaining': null
@@ -1269,8 +1311,11 @@ function b2f_new_event(e) { // incoming SSB log event: we get map with three ent
                 // if (a[1] != null)
                 //   txt = a[1];
                 var p = {
-                    "key": e.header.ref, "from": e.header.fid, "body": a[1],
-                    "voice": a[2], "when": a[3] * 1000
+                    "key": e.header.ref,
+                    "from": e.header.fid,
+                    "body": a[1],
+                    "voice": a[2],
+                    "when": a[3] * 1000 //why is there a factor of 1000 here?
                 };
                 console.log("new post 2 ", p)
                 console.log("time: ", a[3])
