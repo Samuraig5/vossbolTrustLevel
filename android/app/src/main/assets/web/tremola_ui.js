@@ -340,7 +340,6 @@ function qr_scan_success(s) {
         return;
     }
     // FIXME: do sanity tests
-    createdContactViaQR = true;
     menu_edit('new_contact_alias', "Assign alias to new contact:<br>(only you can see this alias)", "");
 }
 
@@ -353,7 +352,14 @@ function qr_scan_confirmed() {
     var s = document.getElementById('alias_id').innerHTML;
     // c = {alias: a, id: s};
     var i = (a + "?").substring(0, 1).toUpperCase()
-    var c = {"alias": a, "initial": i, "color": colors[Math.floor(colors.length * Math.random())]};
+    // Add contact to JSON Database if QR-Code is scanned
+    var c = {
+        "alias": a,
+        "initial": i,
+        "color": colors[Math.floor(colors.length * Math.random())],
+        "creationMethod": "QR-Scan",
+        "levelsOfTrust": trustLevels.Friend
+    };
     tremola.contacts[s] = c;
     persist();
     backend("add:contact " + s + " " + btoa(a))

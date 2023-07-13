@@ -5,7 +5,6 @@
 var tremola;
 var curr_chat;
 var qr;
-var createdContactViaQR;
 var myId;
 var localPeers = {}; // feedID ~ [isOnline, isConnected] - TF, TT, FT - FF means to remove this entry
 var must_redraw = false;
@@ -159,22 +158,21 @@ function edit_confirmed() {
             val = id2b32(new_contact_id);
 
         let trustLevel = trustLevels.Stranger
+        let contact_creation = "";
 
         // adjust levelOfTrust depending on how they got to be your contact
         if (edit_target == 'new_contact_alias') {
-            if (createdContactViaQR == true) {
-                trustLevel = trustLevels.Friend
-            } else {
-                trustLevel = trustLevels.Acquaintance
-            }
+            contact_creation = "SSB-ID"
+            trustLevel = trustLevels.Acquaintance
         } else if (edit_target == 'trust_wifi_peer') {
+            contact_creation = "Wifi-Peer"
             trustLevel = trustLevels.Stranger
         }
-        createdContactViaQR = false;
         tremola.contacts[new_contact_id] = {
             "alias": val,
             "initial": val.substring(0, 1).toUpperCase(),
             "color": colors[Math.floor(colors.length * Math.random())],
+            "creationMethod": contact_creation,
             "levelsOfTrust": trustLevel
         };
         var recps = [myId, new_contact_id];
@@ -949,7 +947,10 @@ function show_contact_details(id) {
     var details = '';
     details += '<br><div>Shortname: &nbsp;' + id2b32(id) + '</div>\n'; // Display the short name
     details += '<br><div style="word-break: break-all;">SSB identity: &nbsp;<tt>' + id + '</tt></div>\n'; // Display the id
-    details += '<br><div style="word-break: break-all;">Trust Level: &nbsp;<tt>' + c.levelsOfTrust.trustName + '</tt></div>\n'; // Display current turst level
+    if (c.creationMethod == null) {
+        c.creationMethod = "Unknown"
+    }
+    details += '<br><div style="word-break: break-all;">Creation Method: &nbsp;<tt>' + c.creationMethod + '</tt></div>\n'; // Display current turst level
 
     // Generate dropdown options dynamically from trustLevels enum
     var trustOptions = '';
