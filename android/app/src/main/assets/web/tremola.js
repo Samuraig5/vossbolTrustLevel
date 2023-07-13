@@ -5,6 +5,7 @@
 var tremola;
 var curr_chat;
 var qr;
+var createdContactViaQR;
 var myId;
 var localPeers = {}; // feedID ~ [isOnline, isConnected] - TF, TT, FT - FF means to remove this entry
 var must_redraw = false;
@@ -161,10 +162,15 @@ function edit_confirmed() {
 
         // adjust levelOfTrust depending on how they got to be your contact
         if (edit_target == 'new_contact_alias') {
-            trustLevel = trustLevels.Acquaintance
+            if(createdContactViaQR == true) {
+                trustLevel = trustLevels.Friend
+            } else {
+                trustLevel = trustLevels.Acquaintance
+            }
         } else if (edit_target == 'trust_wifi_peer') {
             trustLevel = trustLevels.Stranger
         }
+        createdContactViaQR = false;
         tremola.contacts[new_contact_id] = {
             "alias": val,
             "initial": val.substring(0, 1).toUpperCase(),
@@ -1385,12 +1391,12 @@ function b2f_new_event(e) { // incoming SSB log event: we get map with three ent
                 // var txt = null;
                 // if (a[1] != null)
                 //   txt = a[1];
+
                 let shouldDisplay = false
                 // if the user does not have a trust-Score, add a default "Stranger" trust-Score to the user
                 if(tremola.contacts[e.header.fid] != null && tremola.contacts[e.header.fid].levelsOfTrust == null) {
                     tremola.contacts[e.header.fid].levelsOfTrust = trustLevels.Stranger;
                 }
-
                 var p = {
                     "key": e.header.ref,
                     "from": e.header.fid,

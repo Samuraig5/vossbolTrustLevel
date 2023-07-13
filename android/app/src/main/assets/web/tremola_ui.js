@@ -340,6 +340,7 @@ function qr_scan_success(s) {
         return;
     }
     // FIXME: do sanity tests
+    createdContactViaQR = true;
     menu_edit('new_contact_alias', "Assign alias to new contact:<br>(only you can see this alias)", "");
 }
 
