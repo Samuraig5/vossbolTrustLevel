@@ -335,7 +335,7 @@ function new_voice_post(voice_b64) {
         // recps = "ALL";
         backend("publ:post [] " + draft + " " + voice_b64); //  + recps)
     } else {
-        // recps = tremola.chats[curr_chat].members.join(' ');
+        let recps = tremola.chats[curr_chat].members.join(' ');
         backend("priv:post [] " + draft + " " + voice_b64 + " " + recps);
     }
     document.getElementById('draft').value = '';
