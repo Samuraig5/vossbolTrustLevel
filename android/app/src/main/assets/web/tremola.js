@@ -609,7 +609,6 @@ function load_chat_list() {
         loadChatItems(chatBuckets[trustLevels[level].trustScore]);
     }
 
-    load_chat_item('ALL')
     // Forgotten chats: unsorted
     if (!tremola.settings.hide_forgotten_conv) {
         for (var p in tremola.chats) {
@@ -618,7 +617,9 @@ function load_chat_list() {
             }
         }
     }
-
+    if(!tremola.chats['ALL']['forgotten']) {
+        load_chat_item('ALL')
+    }
 }
 
 function getTrustLevelOfChat(nm) {
