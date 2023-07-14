@@ -1279,6 +1279,7 @@ function resetTremola() { // wipes browser-side content
         "initial": "M",
         "color": "#bd7578",
         "levelsOfTrust": trustLevels.Friend,
+        "creationMethod": "System-Created",
         "forgotten": false
     };
     createBoard('Personal Board', [FLAG.PERSONAL])
