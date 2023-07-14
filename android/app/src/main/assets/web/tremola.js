@@ -576,6 +576,7 @@ function load_chat_list() {
     // console.log('meOnly', meOnly)
     document.getElementById('lst:chats').innerHTML = '';
     load_chat_item(meOnly)
+    load_chat_item('ALL')
 
     let chatBuckets = {};
 
@@ -608,7 +609,7 @@ function load_chat_list() {
         loadChatItems(chatBuckets[trustLevels[level].trustScore]);
     }
 
-    // Forgotten chats: unsorted
+    // Forgotten chats: unsorted?
     if (!tremola.settings.hide_forgotten_conv) {
         for (var p in tremola.chats) {
             if (p === 'ALL') {
@@ -619,7 +620,6 @@ function load_chat_list() {
             }
         }
     }
-    load_chat_item('ALL')
 }
 
 
@@ -633,7 +633,8 @@ function getTrustLevelOfChat(nm) {
         let member = chatMemberList[i]
         if (member == 'ALL') {
             // colour ALL channel differently?
-            tintColour = trustLevels.Stranger.tintColour
+            // tintColour = trustLevels.Stranger.tintColour
+            tintColour = lerpColor(trustLevels.Stranger.tintColour, trustLevels.Friend.tintColour, 0.5)
             continue;
         }
         let contact = tremola.contacts[member]
