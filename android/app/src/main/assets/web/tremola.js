@@ -502,7 +502,7 @@ function appendRandomMessageInChat(nm) {
     let ch = tremola.chats[nm]
     let headerRef = Math.floor(1000000 * Math.random());
     let user = getRandomUserOfChat(nm)
-    console.log(tremola.contacts[user].levelsOfTrust.trustScore)
+    // console.log(tremola.contacts[user].levelsOfTrust.trustScore)
     var p = {
         "key": headerRef,
         "from": user,
@@ -545,6 +545,7 @@ function load_chat(nm) {
     // update unread badge:
     ch["lastRead"] = Date.now();
     persist();
+    load_chat_list()
     document.getElementById(nm + '-badge').style.display = 'none' // is this necessary?
     setTimeout(function () { // let image rendering (fetching size) take place before we scroll
         var c = document.getElementById('core');
@@ -591,9 +592,8 @@ function load_chat_list() {
     }
 
     let sortBuckets = (bucket) => {
-        return bucket.sort((a, b) => tremola.chats[b]["touched"] - tremola.chats[a]["touched"]);
+        return bucket.sort((a, b) => tremola.chats[b]["lastRead"] - tremola.chats[a]["lastRead"]);
     };
-
     for (let level in trustLevels) {
         sortBuckets(chatBuckets[trustLevels[level].trustScore]);
     }
@@ -620,8 +620,8 @@ function load_chat_list() {
         }
     }
     load_chat_item('ALL')
-
 }
+
 
 function getTrustLevelOfChat(nm) {
 
@@ -632,6 +632,7 @@ function getTrustLevelOfChat(nm) {
     for (let i = 0; i < chatMemberList.length; i++) {
         let member = chatMemberList[i]
         if (member == 'ALL') {
+            // colour ALL channel differently?
             tintColour = trustLevels.Stranger.tintColour
             continue;
         }
@@ -957,7 +958,6 @@ function show_contact_details(id) {
     var curTrustLevel = tremola.contacts[new_contact_id].levelsOfTrust.trustName
     trustOptions += '<option value="' + curTrustLevel + '">' + curTrustLevel + '</option>';
     for (var trustLevel in trustLevels) {
-        console.log(trustLevel + " " + curTrustLevel)
         if (trustLevel === curTrustLevel) {
             continue
         }
