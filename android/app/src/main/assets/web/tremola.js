@@ -882,7 +882,7 @@ function load_contact_item(c) {
     item.setAttribute('style', 'padding: 0px 5px 10px 5px;'); // old JS (SDK 23)
     // If no Initial is set, take first letter of alias
     if (!("initial" in c[1])) {
-        c[1]["initial"] = c[1].alias.substring(0, 1).toUpperCase();
+        c[1]["initial"] = c[1].alias.substring(0, 1).toUpperCase();5
         persist();
     }
     // If no colour is set, take random colour from predefined list of colours
@@ -1409,7 +1409,7 @@ function b2f_new_event(e) { // incoming SSB log event: we get map with three ent
                     "from": e.header.fid,
                     "body": a[1],
                     "voice": a[2],
-                    "when": a[3] * 1000, //why is there a factor of 1000 here?
+                    "when": a[3] * 1000, // > There is a factor of 1000 here, as a[3] is a timestamp it should not be there - Maybe delete it? - Tom
                     "Display": shouldDisplay
                 };
                 console.log("new post 2 ", p)
